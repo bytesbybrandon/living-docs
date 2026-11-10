@@ -47,7 +47,7 @@ function renderTable(block, ctx) {
   }).join('')}</tr>`).join('');
   return `<figure class="tbl${spanClass(block)}">
     ${caption}
-    <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+    <div class="tbl-scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
   </figure>`;
 }
 
@@ -300,7 +300,7 @@ export function renderBlock(block, ctx) {
         : `${ctx.counters.section}.${ctx.counters.sub}`;
       const subtitle = block.subtitle ? `<p class="sec-subtitle">${renderInline(block.subtitle)}</p>` : '';
       return `<h${level} class="${level === 2 ? 'sec-head' : 'sub-head'}" id="sec-${number.replace('.', '-')}">
-        <span class="sec-num">${number}</span><span class="sec-title">${renderInline(block.title)}</span>
+        <span class="sec-num">${number}</span> <span class="sec-title">${renderInline(block.title)}</span>
       </h${level}>${subtitle}`;
     }
     case 'figure': return renderFigure(block, ctx);
