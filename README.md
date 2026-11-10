@@ -150,7 +150,7 @@ Local checkout:
   "mcpServers": {
     "living-docs": {
       "command": "node",
-      "args": ["C:/Users/brand/Desktop/living-docs/bin/living-docs-mcp.js"]
+      "args": ["<absolute-checkout>/bin/living-docs-mcp.js"]
     }
   }
 }
@@ -159,10 +159,11 @@ Local checkout:
 Tools: `living_docs_themes`, `living_docs_schema`, `living_docs_ingest`, `living_docs_render`, `living_docs_preview`.
 `living_docs_render` accepts a model object, a model path, or a source to draft from.
 
-## Reactive skill
+## Reactive workflow
 
-`living-docs` (authored in `~/Desktop/skills/living-docs`) runs the end-to-end workflow: intake, outline, theme and layout plan, model authoring, validation, render, human review, finalize.
-It calls this CLI; it does not reimplement rendering.
+An optional reactive skill wraps the same pipeline: intake, outline, theme and style plan, model authoring, validation, render, human review, finalize.
+It calls this CLI and does not reimplement rendering.
+The skill is maintained separately from this package; `src/model/schema.js` and the AXI commands below are the stable engine surface.
 
 ## Guarantees
 
