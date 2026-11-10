@@ -2,6 +2,7 @@ import { validateDoc } from '../model/validate.js';
 import { createContext, renderBlocks, documentStats } from './blocks.js';
 import { THEMES as THEME_INFO } from '../model/schema.js';
 import { resolveStyle } from './style.js';
+import { timelineAssets } from './timeline.js';
 import * as paperLight from './themes/paper-light.js';
 import * as paperDark from './themes/paper-dark.js';
 import * as hud from './themes/hud.js';
@@ -33,7 +34,7 @@ export function themeList() {
  * Render a document model to a complete, self-contained HTML string.
  * @returns {{ok: boolean, html?: string, stats?: object, warnings?: string[], errors?: object[], theme: string}}
  */
-export function renderDoc(model, { theme, baseDir, accent } = {}) {
+export function renderDoc(model, { theme, baseDir, accent, stage = false } = {}) {
   const chosen = theme || model?.theme || 'paper-light';
   const themeModule = THEMES[chosen];
   if (!themeModule) {
@@ -50,7 +51,13 @@ export function renderDoc(model, { theme, baseDir, accent } = {}) {
   const ctx = createContext({ theme: chosen, palette, baseDir, model });
   ctx.style = styled;
   const blocksHtml = renderBlocks(model.blocks, ctx);
-  const html = themeModule.document({ model, ctx, palette, blocksHtml, style: styled });
+  let html = themeModule.document({ model, ctx, palette, blocksHtml, style: styled });
+  // Timeline runtime only ships when cues exist or a video stage is rendered, so static docs keep their bytes.
+  if (model.timeline || stage) {
+    html = html
+      .replace('<html lang="en">', `<html lang="en" class="ld-timed${stage ? ' ld-stage' : ''}">`)
+      .replace('</body>', () => `${timelineAssets(model)}</body>`);
+  }
   const stats = documentStats(model, html);
 
   return {

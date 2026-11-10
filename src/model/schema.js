@@ -327,6 +327,31 @@ export const META = {
   })
 };
 
+// Any block may carry an id so timeline cues can target it.
+export const BLOCK_ID = str('cue anchor: lowercase letters, digits, hyphens; unique in the document', { optional: true });
+
+export const CUE_ACTIONS = {
+  highlight: 'sweep a highlighter across a [[mark:id|text]] sentence or a block, then leave a faint underline',
+  focus: 'light up a block or part (diagram node, panel, scene label) and dim its siblings',
+  reveal: 'fade and rise a block or part into view at the cue time; hidden before it',
+  count: 'count the numbers inside the target up from zero',
+  type: 'type the text of the target out character by character',
+  camera: 'stage video only: push the camera onto a block or part, or back to "page"',
+  activate: 'hud scene only: glide the crosshair to a scene label (target "<sceneId>/<label>")'
+};
+
+export const TIMELINE = {
+  duration: num('total seconds; default last cue end plus 1.5', { optional: true }),
+  loop: bool('restart when the timeline ends (live page only)', { optional: true }),
+  cues: arr(obj({
+    at: num('start time in seconds'),
+    dur: num('seconds the cue runs, default 1.2', { optional: true }),
+    do: oneOf(Object.keys(CUE_ACTIONS), 'action'),
+    target: str('"mark:<id>", "<blockId>", "<blockId>/<part>" (diagram node id, panel index, scene label), or "page" for camera'),
+    zoom: num('camera only: scale, default fits the target', { optional: true })
+  }, 'cue'), 'cues in any order')
+};
+
 export const THEMES = {
   'paper-light': {
     summary: 'Academic paper: serif, two justified columns, drop caps, margin stamp, print rules.',

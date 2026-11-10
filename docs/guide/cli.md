@@ -7,8 +7,8 @@ living-docs-axi                         home: themes, built docs, next steps
 living-docs-axi themes                  theme list with when to use each
 living-docs-axi schema [--block figure] block fields and types
 living-docs-axi ingest <path|url|->     outline, or --section <n|id> for one section
-living-docs-axi ingest <path> --draft   write a model from the source
-living-docs-axi render <model.json>     validate and write HTML
+living-docs-axi ingest <path> --draft   write a model, with a drafted timeline, from the source
+living-docs-axi render <model.json>     validate and write HTML, or --format mp4|webm|gif for video
 living-docs-axi validate <model.json>   validation only
 living-docs-axi preview [dir]           serve built docs with an index
 ```
@@ -27,6 +27,11 @@ living-docs-axi preview [dir]           serve built docs with an index
 | `--text <text>` | ingest inline text |
 | `--port <n>` | preview port, default 4600 |
 | `--no-open` | do not open a browser |
+| `--static` | draft without timeline cues |
+| `--format <f>` | `html` (default), `mp4`, `webm`, or `gif` |
+| `--size <WxH>` | video stage, default `1080x1350` |
+| `--fps <n>` | video frames per second, default 30 |
+| `--scale <n>` | device pixel ratio for the stage, default 1 |
 
 ## Exit codes
 
@@ -52,3 +57,4 @@ npx -y -p @bytesbybrandon/living-docs living-docs-axi preview docs --no-open
 
 - [Pipeline](pipeline.md)
 - [Document model](document-model.md)
+- [Timeline and video](timeline.md)

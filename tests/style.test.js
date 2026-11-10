@@ -59,7 +59,7 @@ test('style tokens reach the rendered page', () => {
 });
 
 test('minimal figures drop chart gridlines', () => {
-  const base = JSON.parse(fs.readFileSync(path.resolve('samples/harness-engineering.json'), 'utf8'));
+  const { timeline, ...base } = JSON.parse(fs.readFileSync(path.resolve('samples/harness-engineering.json'), 'utf8')); // cues target blocks this test drops
   const chartFigure = { ...base, meta: { ...base.meta, style: { figure: 'outline' } }, blocks: base.blocks.filter(block => block.type === 'figure') };
   const minimalFigure = { ...chartFigure, meta: { ...chartFigure.meta, style: { figure: 'minimal' } } };
   const outline = renderDoc(chartFigure, { theme: 'paper-light' });

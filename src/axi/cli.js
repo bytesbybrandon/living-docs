@@ -8,6 +8,7 @@ import { renderDoc, themeList } from '../render/index.js';
 import { validateDoc, formatErrors } from '../model/validate.js';
 import { BLOCKS, THEMES, META, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
+import { exportVideo, FORMATS } from '../export/video.js';
 
 const HOME = os.homedir();
 const BIN = fileURLToPath(new URL('../../bin/living-docs-axi.js', import.meta.url));
@@ -24,11 +25,16 @@ const FLAGS = {
   '--port': 'value',
   '--outline': 'bool',
   '--draft': 'bool',
+  '--static': 'bool',
   '--json': 'bool',
   '--stdout': 'bool',
   '--no-open': 'bool',
   '--full': 'bool',
   '--block': 'value',
+  '--format': 'value',
+  '--size': 'value',
+  '--fps': 'value',
+  '--scale': 'value',
   '--help': 'bool', '-h': 'bool'
 };
 
@@ -217,7 +223,7 @@ async function ingest({ args, flags }) {
   if (flags.draft) {
     const theme = flags.theme || 'paper-dark';
     if (!THEMES[theme]) throw new UsageError(`unknown theme "${theme}" (one of: ${Object.keys(THEMES).join(', ')})`);
-    const model = draftModel(ingested, { theme });
+    const model = draftModel(ingested, { theme, cues: !flags.static });
     const validation = validateDoc(model);
     if (!validation.ok) {
       return [`error: draft model is invalid`, formatErrors(validation.errors)].join('\n');
@@ -293,9 +299,47 @@ function runRender(flags, { quiet = false } = {}) {
   return { ok: true, status: lines.join('\n'), file: out, result };
 }
 
-function renderCommand({ args, flags }) {
+async function renderVideo(flags) {
+  const format = flags.format;
+  const { model, baseDir } = loadModel(flags._input);
+  const theme = flags.theme || model.theme || 'paper-light';
+  const out = flags.out && flags.out !== '-' ? flags.out : path.join('docs', `${slugify(model.meta?.title || 'document')}-${theme}.${format}`);
+  fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
+  const started = Date.now();
+  let result;
+  try {
+    result = await exportVideo(model, {
+      theme, baseDir, format, out,
+      size: flags.size,
+      fps: flags.fps ? Number(flags.fps) : undefined,
+      scale: flags.scale ? Number(flags.scale) : undefined
+    });
+  } catch (error) {
+    if (error.name !== 'RenderError') throw error;
+    process.exitCode = 1;
+    return ['error: model invalid', formatErrors(error.errors)].join('\n');
+  }
+  return [
+    'ok: true',
+    `file: ${displayPath(out)}`,
+    `format: ${format}`,
+    `theme: ${result.theme}`,
+    `size: ${result.width}x${result.height}`,
+    `frames: ${result.frames}`,
+    `seconds: ${result.duration}`,
+    `bytes: ${fs.statSync(out).size}`,
+    `render_ms: ${Date.now() - started}`
+  ].join('\n') + helpLines([`Run \`living-docs-axi render ${displayPath(flags._input)} --theme ${theme}\` for the live HTML`]);
+}
+
+async function renderCommand({ args, flags }) {
   flags._input = args[0];
   if (!flags._input) throw new UsageError('render needs a model path (or `-` for stdin)');
+  if (flags.format && flags.format !== 'html') {
+    if (!FORMATS.includes(flags.format)) throw new UsageError(`--format must be one of: html, ${FORMATS.join(', ')}`);
+    if (flags.stdout) throw new UsageError('--stdout only works with html');
+    return renderVideo(flags);
+  }
   const rendered = runRender(flags);
   process.exitCode = rendered.ok ? 0 : 1;
   return rendered.status;
@@ -343,8 +387,8 @@ async function preview({ args, flags }) {
 }
 
 const COMMAND_HELP = {
-  ingest: 'ingest <path|url|-> [--url <url>] [--text <text>] [--outline] [--section <n|id>] [--draft] [--theme <name>] [-o <file>] [--max-chars <n>] [--full]',
-  render: 'render <model.json|-> [--theme <name>] [-o <file>] [--stdout]',
+  ingest: 'ingest <path|url|-> [--url <url>] [--text <text>] [--outline] [--section <n|id>] [--draft] [--static] [--theme <name>] [-o <file>] [--max-chars <n>] [--full]',
+  render: 'render <model.json|-> [--theme <name>] [-o <file>] [--stdout] [--format html|mp4|webm|gif] [--size 1080x1350] [--fps 30] [--scale 1]',
   validate: 'validate <model.json|->',
   preview: 'preview [file|dir] [--port <n>] [--no-open]',
   themes: 'themes',
@@ -384,7 +428,7 @@ export async function main(argv) {
       case 'ingest':
         return await ingest({ args, flags });
       case 'render':
-        return renderCommand({ args, flags });
+        return await renderCommand({ args, flags });
       case 'validate':
         return validateCommand({ args, flags });
       case 'preview':

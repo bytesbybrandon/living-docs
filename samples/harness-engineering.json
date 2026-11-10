@@ -11,7 +11,7 @@
     "stamps": [
       "arXiv:2609.00006v1 [cs.SE] 15 Jul 2026"
     ],
-    "abstract": "An agent is a model plus a harness: the runtime that couples an LLM to the world through a loop, tools, context management, safety controls, orchestration, and extension surfaces. This paper defines the harness, maps its seven canonical subsystems with the minimal and maximal implementation of each, and dissects eleven production coding harnesses along those subsystems. It does not benchmark or rank them; it describes and compares how the systems are built. Two absences and three extensibility standards survive a threefold corpus expansion across roughly four million lines of Python, TypeScript, and Rust.",
+    "abstract": "[[mark:agent|An agent is a model plus a harness: the runtime that couples an LLM to the world through a loop, tools, context management, safety controls, orchestration, and extension surfaces.]] This paper defines the harness, [[mark:maps|maps its seven canonical subsystems with the minimal and maximal implementation of each]], and dissects eleven production coding harnesses along those subsystems. It does not benchmark or rank them; it describes and compares how the systems are built. [[mark:standards|Two absences and three extensibility standards survive a threefold corpus expansion]] across roughly four million lines of Python, TypeScript, and Rust.",
     "indexTerms": [
       "coding agents",
       "harness engineering",
@@ -39,6 +39,7 @@
     },
     {
       "type": "figure",
+      "id": "anatomy",
       "caption": "An agent is a model plus a harness of seven subsystems. The harness owns everything outside the weights.",
       "spec": "diagram",
       "motion": "draw",
@@ -117,6 +118,7 @@
     },
     {
       "type": "figure",
+      "id": "standards",
       "caption": "Extensibility standards across eleven coding harnesses. Counts include partial support, greyed in the paper's original figure.",
       "spec": "chart",
       "motion": "steps",
@@ -163,6 +165,7 @@
     },
     {
       "type": "figure",
+      "id": "convergence",
       "caption": "Convergence becomes imitation: Codex reads Claude Code's hook vocabulary while OpenHands reads its plugin format.",
       "spec": "diagram",
       "motion": "draw",
@@ -182,6 +185,7 @@
     },
     {
       "type": "stats",
+      "id": "counts",
       "caption": "Counts stated in the abstract of the study.",
       "items": [
         { "label": "Cross-cutting observations", "value": "13" },
@@ -203,5 +207,31 @@
         "Adoption counts include partial support and are reported as fractions of eleven systems."
       ]
     }
-  ]
+  ],
+  "timeline": {
+    "cues": [
+      { "at": 0.4, "dur": 4.2, "do": "highlight", "target": "mark:agent" },
+      { "at": 0.6, "dur": 0.9, "do": "focus", "target": "anatomy/model" },
+      { "at": 1.05, "dur": 0.9, "do": "focus", "target": "anatomy/loop" },
+      { "at": 1.5, "dur": 0.9, "do": "focus", "target": "anatomy/tools" },
+      { "at": 1.9500000000000002, "dur": 0.9, "do": "focus", "target": "anatomy/context" },
+      { "at": 2.4, "dur": 0.9, "do": "focus", "target": "anatomy/safety" },
+      { "at": 2.85, "dur": 0.9, "do": "focus", "target": "anatomy/orchestration" },
+      { "at": 3.3000000000000003, "dur": 0.9, "do": "focus", "target": "anatomy/extensions" },
+      { "at": 3.75, "dur": 0.9, "do": "focus", "target": "anatomy/integration" },
+      { "at": 4.8, "dur": 1.6, "do": "camera", "target": "anatomy" },
+      { "at": 5, "dur": 2.4, "do": "highlight", "target": "mark:maps" },
+      { "at": 5.6, "dur": 2, "do": "focus", "target": "anatomy" },
+      { "at": 7.8, "dur": 1.8, "do": "camera", "target": "standards" },
+      { "at": 8, "dur": 2.6, "do": "highlight", "target": "mark:standards" },
+      { "at": 9.4, "dur": 2, "do": "focus", "target": "standards" },
+      { "at": 11.6, "dur": 1.8, "do": "camera", "target": "convergence" },
+      { "at": 12.6, "dur": 1, "do": "focus", "target": "convergence/cc" },
+      { "at": 13.4, "dur": 1, "do": "focus", "target": "convergence/codex" },
+      { "at": 14.2, "dur": 1, "do": "focus", "target": "convergence/openhands" },
+      { "at": 15.4, "dur": 1.6, "do": "camera", "target": "counts" },
+      { "at": 15.8, "dur": 1.6, "do": "count", "target": "counts" },
+      { "at": 18, "dur": 1.8, "do": "camera", "target": "page" }
+    ]
+  }
 }

@@ -1,3 +1,4 @@
+import { draftCues } from './cues.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseMarkdown, slug, wordCount } from '../model/markdown.js';
@@ -197,7 +198,7 @@ export function blockToModelBlock(block) {
  * Build a valid draft model straight from a source. This is the zero-judgment path:
  * it renders, then an agent upgrades sections, figures, and callouts.
  */
-export function draftModel(ingested, { theme = 'paper-dark', includePreamble = true, maxBlocks = 400 } = {}) {
+export function draftModel(ingested, { theme = 'paper-dark', includePreamble = true, maxBlocks = 400, cues = true } = {}) {
   const { meta, sections, preamble } = ingested;
   const blocks = [];
   let abstractPending = Boolean(meta.abstract);
@@ -224,7 +225,7 @@ export function draftModel(ingested, { theme = 'paper-dark', includePreamble = t
     if (blocks.length >= maxBlocks) break;
   }
 
-  return {
+  const model = {
     schemaVersion: 1,
     theme,
     meta: {
@@ -236,6 +237,7 @@ export function draftModel(ingested, { theme = 'paper-dark', includePreamble = t
     },
     blocks: blocks.length ? blocks : [{ type: 'prose', markdown: meta.title }]
   };
+  return cues ? draftCues(model) : model;
 }
 
 /**

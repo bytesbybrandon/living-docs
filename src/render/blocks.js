@@ -186,7 +186,7 @@ function renderGraphScene(block, ctx) {
   const left = (active.x / payload.width) * 100;
   const top = (active.y / payload.height) * 100;
   const cardRows = (card?.rows || []).map(row => `<div class="sc-row"><span>${escapeHtml(row.k)}</span><b>${escapeHtml(row.v)}</b></div>`).join('');
-  const labels = payload.labels.map(label => `<span class="scene-label" style="left:${(label.x / payload.width) * 100}%;top:${(label.y / payload.height) * 100}%">${escapeHtml(label.text)}</span>`).join('');
+  const labels = payload.labels.map(label => `<span class="scene-label" data-part="${escapeHtml(label.text)}" style="left:${(label.x / payload.width) * 100}%;top:${(label.y / payload.height) * 100}%">${escapeHtml(label.text)}</span>`).join('');
   const status = block.status
     ? `<div class="scene-status"><span class="sc-seq">${escapeHtml(block.status.seq)}</span> <span class="sc-kind">${escapeHtml(block.status.kind)}</span> <span class="sc-sep">::</span> <span class="sc-text">${escapeHtml(block.status.text)}</span> <span class="sc-tail">${escapeHtml(block.status.tail)}</span></div>`
     : '';
@@ -209,8 +209,8 @@ function renderGraphScene(block, ctx) {
       <canvas class="scene-canvas" aria-hidden="true"></canvas>
       <div class="scene-crosshair" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%"></div>
       ${labels}
-      <span class="scene-active-label" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%">${escapeHtml(graph.active?.id || '')}</span>
-      ${graph.active?.badge ? `<span class="scene-badge" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%">${escapeHtml(graph.active.badge)}</span>` : ''}
+      <span class="scene-active-label${left > 55 ? ' to-left' : ''}" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%">${escapeHtml(graph.active?.id || '')}</span>
+      ${graph.active?.badge ? `<span class="scene-badge${left > 55 ? ' to-left' : ''}" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%">${escapeHtml(graph.active.badge)}</span>` : ''}
       ${card ? `<div class="scene-card" style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%">
         <div class="sc-card-title">${escapeHtml(card.title)}</div>
         ${cardRows}
@@ -305,7 +305,7 @@ function renderPanels(block, ctx) {
   const columns = Math.max(1, Math.min(6, block.columns || 4));
   const items = block.items.map((panel, index) => {
     const tag = panel.tag ? `<span class="panel-tag">${escapeHtml(panel.tag)}</span>` : '';
-    return `<article class="panel panel-${panel.kind}"${panel.span ? ` style="grid-column: span ${Math.min(columns, panel.span)}"` : ''}>
+    return `<article class="panel panel-${panel.kind}" data-part="${escapeHtml(panel.index || String(index + 1).padStart(2, '0'))}"${panel.span ? ` style="grid-column: span ${Math.min(columns, panel.span)}"` : ''}>
       <header class="panel-head"><span class="panel-index">${escapeHtml(panel.index || String(index + 1).padStart(2, '0'))}</span><span class="panel-title">${escapeHtml(panel.title || '')}</span>${tag}</header>
       <div class="panel-body">${renderPanelBody(panel.kind, panel.data || {}, ctx)}</div>
     </article>`;
@@ -354,8 +354,12 @@ export function renderBlock(block, ctx) {
   }
 }
 
+// A block id becomes a data-cue anchor on the block's first element.
 export function renderBlocks(blocks, ctx) {
-  return blocks.map(block => renderBlock(block, ctx)).join('\n');
+  return blocks.map(block => {
+    const html = renderBlock(block, ctx);
+    return block.id ? html.replace(/^(\s*<[a-z0-9]+)/i, `$1 data-cue="${escapeHtml(block.id)}"`) : html;
+  }).join('\n');
 }
 
 export function documentStats(model, html) {
