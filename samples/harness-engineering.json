@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "theme": "paper-light",
+  "meta": {
+    "title": "Harness Engineering: Anatomy, Architecture, and Evolution of Coding Agents",
+    "subtitle": "A source-code study of eleven systems",
+    "author": "Paul Barbaste, Tristan Darrigol, Germain Vu, and Tom Wiltberger",
+    "affiliation": "Inclusive Brains · Wavestone AI Lab",
+    "date": "July 2026",
+    "stamps": [
+      "arXiv:2609.00006v1 [cs.SE] 15 Jul 2026"
+    ],
+    "abstract": "An agent is a model plus a harness: the runtime that couples an LLM to the world through a loop, tools, context management, safety controls, orchestration, and extension surfaces. This paper defines the harness, maps its seven canonical subsystems with the minimal and maximal implementation of each, and dissects eleven production coding harnesses along those subsystems. It does not benchmark or rank them; it describes and compares how the systems are built. Two absences and three extensibility standards survive a threefold corpus expansion across roughly four million lines of Python, TypeScript, and Rust.",
+    "indexTerms": [
+      "coding agents",
+      "harness engineering",
+      "source-code study",
+      "MCP",
+      "SKILL.md",
+      "ACP"
+    ],
+    "runningHead": "Harness Engineering",
+    "footer": "living-docs · paper-light"
+  },
+  "blocks": [
+    {
+      "type": "heading",
+      "title": "Introduction",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "A coding agent is not a model. It is a model plus a harness: the program that supplies the loop, tools, context, safety controls, orchestration, and extension surfaces around the weights. Harness engineering names the discipline of designing that runtime, and in the first half of 2026 it moved from a craft to a platform. Vendor SDKs shipped harnesses, marketplaces appeared, switching-cost tooling arrived, and enterprise governance started to treat the harness as the addressable unit. The corpus this paper studies is eleven production systems, read at source level rather than benchmarked."
+    },
+    {
+      "type": "prose",
+      "markdown": "The paper's most useful contribution is a boundary. The model is frozen inside the product; everything else can be rewritten, swapped, or governed. That boundary is where the design decisions live, and it is what this note reproduces in compact form."
+    },
+    {
+      "type": "figure",
+      "caption": "An agent is a model plus a harness of seven subsystems. The harness owns everything outside the weights.",
+      "spec": "diagram",
+      "diagram": {
+        "width": 1000,
+        "height": 440,
+        "nodes": [
+          { "id": "model", "label": "the model", "sub": "LLM weights", "x": 410, "y": 180, "w": 180, "h": 76, "kind": "accent", "icon": "none" },
+          { "id": "loop", "label": "loop", "x": 410, "y": 36, "w": 180, "h": 52 },
+          { "id": "tools", "label": "tools", "sub": "shell, editor, search", "x": 745, "y": 56, "w": 165, "h": 58 },
+          { "id": "context", "label": "context", "sub": "files, memory, retrieval", "x": 745, "y": 158, "w": 165, "h": 58 },
+          { "id": "safety", "label": "safety", "sub": "approvals, sandboxes", "x": 745, "y": 260, "w": 165, "h": 58 },
+          { "id": "orchestration", "label": "orchestration", "sub": "subagents, queues", "x": 410, "y": 360, "w": 180, "h": 58 },
+          { "id": "extensions", "label": "extensions", "sub": "MCP, skills, hooks", "x": 100, "y": 260, "w": 165, "h": 58 },
+          { "id": "integration", "label": "LLM integration", "sub": "auth, streaming, retries", "x": 100, "y": 158, "w": 165, "h": 58 }
+        ],
+        "edges": [
+          { "from": "model", "to": "loop", "style": "line" },
+          { "from": "model", "to": "tools", "style": "line" },
+          { "from": "model", "to": "context", "style": "line" },
+          { "from": "model", "to": "safety", "style": "line" },
+          { "from": "model", "to": "orchestration", "style": "line" },
+          { "from": "model", "to": "extensions", "style": "line" },
+          { "from": "model", "to": "integration", "style": "line" }
+        ],
+        "groups": [
+          {
+            "label": "the harness — every subsystem outside the weights",
+            "nodes": ["loop", "tools", "context", "safety", "orchestration", "extensions", "integration"],
+            "style": "outline"
+          }
+        ]
+      }
+    },
+    {
+      "type": "heading",
+      "title": "The seven subsystems",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "Each subsystem has a minimal and a maximal implementation. The minimal column is what a credible harness must supply; the maximal column is what production systems added as the runtime matured. The gap between the two is where most of the source code lives."
+    },
+    {
+      "type": "table",
+      "caption": "Minimal and maximal implementations of the seven harness subsystems.",
+      "columns": [
+        { "label": "Subsystem" },
+        { "label": "Minimal implementation" },
+        { "label": "Maximal implementation" }
+      ],
+      "rows": [
+        ["Loop", "Read, dispatch one tool, append result, repeat", "Streamed plans, parallel tools, resumable checkpoints, budget guards"],
+        ["Tools", "Shell plus a file editor", "Sandboxed executors, LSP-aware edits, browser and search tools, typed schemas"],
+        ["Context", "System prompt plus recent turns", "Retrieval, compaction, memory files, per-task context assembly"],
+        ["Safety", "Confirmation before writes", "Permission modes, approval queues, secret redaction, audit trails"],
+        ["Orchestration", "One process, one task", "Subagents, parallel worktrees, queues, retries, cancellation"],
+        ["Extensions", "None", "MCP servers, skills, hooks, plugins, marketplaces"],
+        ["LLM integration", "One provider, one key", "Multi-provider routing, streaming, retries, usage accounting"]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Reading the table",
+      "body": "The paper's claim is not that every harness needs the maximal column. It is that the maximal column is where switching costs accumulate, and that the seven subsystems are the natural seams along which products differentiate."
+    },
+    {
+      "type": "heading",
+      "title": "Extensibility standards",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "Three standards appear across the corpus often enough to count as de facto interfaces. MCP wins the tool boundary; SKILL.md wins the instruction boundary; ACP is emerging at the agent-to-agent boundary. Adoption is uneven, and the paper reports it as counts out of eleven systems rather than as a ranking."
+    },
+    {
+      "type": "figure",
+      "caption": "Extensibility standards across eleven coding harnesses. Counts include partial support, greyed in the paper's original figure.",
+      "spec": "chart",
+      "chart": {
+        "kind": "bar",
+        "height": 340,
+        "yLabel": "systems supporting",
+        "yMax": 11,
+        "series": [
+          {
+            "name": "supporting systems",
+            "kind": "bar",
+            "tone": "accent",
+            "values": [8, 9, 6],
+            "labels": ["MCP", "SKILL.md", "ACP"]
+          }
+        ],
+        "annotations": [
+          { "text": "SKILL.md leads MCP 9/11 to 8/11", "x": 1.04, "y": 10.4 }
+        ]
+      }
+    },
+    {
+      "type": "heading",
+      "title": "From tool to platform",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "The second half of 2026 is the convergence story. Codex adopts Claude Code's hook vocabulary; OpenHands reads its plugin format. Behavioral policy migrates from prompt prose into configuration, and the harness becomes an SDK with a marketplace attached. The paper's longitudinal sample of the same eight harnesses across a quarter shows the same drift in three of the eight systems."
+    },
+    {
+      "type": "algorithm",
+      "title": "Harness selection under equal models",
+      "caption": "One decision procedure the paper recommends for teams choosing a harness.",
+      "lines": [
+        { "text": "Input: task set T, fixed model M, candidate harnesses H" },
+        { "text": "for each h in H:", "highlight": true },
+        { "text": "  score[h] = held-out score of h running M on T" },
+        { "text": "  cost[h] = tokens + wall clock + human approvals" },
+        { "text": "choose h maximizing score[h] subject to the cost budget" },
+        { "text": "re-run the loop when M changes; never freeze the harness choice" }
+      ]
+    },
+    {
+      "type": "figure",
+      "caption": "Convergence becomes imitation: Codex reads Claude Code's hook vocabulary while OpenHands reads its plugin format.",
+      "spec": "diagram",
+      "diagram": {
+        "width": 1000,
+        "height": 300,
+        "nodes": [
+          { "id": "cc", "label": "Claude Code", "x": 120, "y": 116, "w": 190, "h": 68, "kind": "accent" },
+          { "id": "codex", "label": "Codex CLI", "x": 680, "y": 40, "w": 200, "h": 62 },
+          { "id": "openhands", "label": "OpenHands", "x": 680, "y": 196, "w": 200, "h": 62 }
+        ],
+        "edges": [
+          { "from": "cc", "to": "codex", "label": "hook vocabulary", "style": "arrow", "route": "elbow" },
+          { "from": "cc", "to": "openhands", "label": "plugin format", "style": "arrow", "route": "elbow" }
+        ]
+      }
+    },
+    {
+      "type": "stats",
+      "caption": "Counts stated in the abstract of the study.",
+      "items": [
+        { "label": "Cross-cutting observations", "value": "13" },
+        { "label": "Design patterns", "value": "29" },
+        { "label": "Recommendations", "value": "18" },
+        { "label": "Minimum viable scaffold", "value": "90", "note": "lines of code" }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "takeaway",
+      "body": "The harness is the product surface; the loop is the discipline. Benchmark the runtime, not the model, and keep the runtime replaceable."
+    },
+    {
+      "type": "footnotes",
+      "items": [
+        "The corpus covers Claude Code, Codex CLI, Gemini CLI, Mistral Vibe, OpenHands, Aider, Mini-SWE-Agent, Hermes, Pi, OpenCode, and OpenClaw.",
+        "Omnigent is analyzed separately as a meta-harness that orchestrates the other ten behind one API.",
+        "Adoption counts include partial support and are reported as fractions of eleven systems."
+      ]
+    }
+  ]
+}

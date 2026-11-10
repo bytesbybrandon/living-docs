@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "theme": "hud",
+  "meta": {
+    "title": "AI CONFIGS / OPEN SOURCE",
+    "kicker": "SRC GITHUB · 5 TEAMS · 5 REPOS · 548.4K STARS · $0",
+    "runningHead": "AI configs · open source audit",
+    "date": "2026-11-10",
+    "footer": "living-docs · hud"
+  },
+  "blocks": [
+    {
+      "type": "graphScene",
+      "title": "AI CONFIGS / OPEN SOURCE",
+      "meta": ["SRC GITHUB", "5 TEAMS", "5 REPOS", "548.4K STARS", "$0"],
+      "tabs": [
+        { "label": "MATT" },
+        { "label": "ADDY", "active": true },
+        { "label": "CLOUDFLARE" },
+        { "label": "OBSIDIAN" },
+        { "label": "GOOGLE" }
+      ],
+      "command": "npx skills add adyosmani/agent-skills",
+      "graph": {
+        "counts": "5,932 NODES · 10,231 LINKS",
+        "azimuth": "AZ 154.1° Z 227",
+        "seed": 11,
+        "nodeCount": 210,
+        "labels": [
+          "ci-cd-and-automation",
+          "idea-refine",
+          "debugging-and-error-recovery",
+          "spec-driven-development",
+          "code-review-and-quality",
+          "design-doc",
+          "interview-me",
+          "context-engineering"
+        ],
+        "active": {
+          "id": "shipping-and-launch",
+          "badge": "/ MATCHED",
+          "card": {
+            "title": "shipping-and-launch",
+            "rows": [
+              { "k": "REPO", "v": "adyosmani/agent-skills" },
+              { "k": "KIND", "v": "SHIP" },
+              { "k": "DOES", "v": "checklists before anything goes live" }
+            ],
+            "footer": "ADDY"
+          }
+        }
+      },
+      "action": { "label": "ship it", "right": "ADDY OSMANI" },
+      "status": {
+        "seq": "03.80",
+        "kind": "skill",
+        "text": "shipping-and-launch matched",
+        "tail": "adyosmani/agent-skills"
+      }
+    },
+    {
+      "type": "panels",
+      "columns": 4,
+      "items": [
+        {
+          "index": "01",
+          "title": "REPO",
+          "tag": "02 / 05",
+          "kind": "repo",
+          "data": {
+            "name": "adyosmani/agent-skills",
+            "stars": "113.9K",
+            "by": "by Ady Osmani",
+            "note": "production-grade engineering skills for AI coding agents"
+          }
+        },
+        {
+          "index": "02",
+          "title": "STAR BOARD",
+          "tag": "LIVE",
+          "kind": "bars",
+          "data": {
+            "rows": [
+              { "label": "MAT", "value": 307.2, "display": "307.2K" },
+              { "label": "ADY", "value": 113.9, "display": "113.9K", "active": true },
+              { "label": "CFL", "value": 63.9, "display": "63.9K" },
+              { "label": "OBS", "value": 50.0, "display": "50.0K" },
+              { "label": "GBL", "value": 13.4, "display": "13.4K" }
+            ]
+          }
+        },
+        {
+          "index": "03",
+          "title": "SKILL INSPECTOR",
+          "tag": "TRACE",
+          "kind": "list",
+          "data": {
+            "title": "shipping-and-launch",
+            "rows": [
+              { "k": "KIND", "v": "SHIP" },
+              { "k": "DOES", "v": "checklists before anything goes live" }
+            ]
+          }
+        },
+        {
+          "index": "04",
+          "title": "SKILL RADAR",
+          "tag": "SCAN",
+          "kind": "radar",
+          "data": {
+            "value": "25",
+            "max": 25,
+            "sub": "SKILLS",
+            "subvalue": "02",
+            "subvalueLabel": "REPO",
+            "found": "found 25 / 25"
+          }
+        },
+        {
+          "index": "05",
+          "title": "SKILL TREE",
+          "tag": "25 SKILLS",
+          "kind": "tree",
+          "data": {
+            "root": "adyosmani/agent-skills/",
+            "items": [
+              { "name": "spec-driven-development/", "tag": "SKILL.md" },
+              { "name": "test-driven-development/", "tag": "SKILL.md" },
+              { "name": "code-review-and-quality/", "tag": "SKILL.md" },
+              { "name": "shipping-and-launch/", "tag": "SKILL.md", "active": true },
+              { "name": "interview-me/", "tag": "SKILL.md" },
+              { "name": "idea-refine/", "tag": "SKILL.md" },
+              { "name": "context-engineering/", "tag": "SKILL.md" }
+            ]
+          }
+        },
+        {
+          "index": "06",
+          "title": "AGENT LOG",
+          "tag": "TAIL · F",
+          "kind": "log",
+          "data": {
+            "lines": [
+              { "n": 18, "verb": "add", "text": "adyosmani/agent-skills" },
+              { "n": 21, "verb": "define", "text": "spec-driven-development" },
+              { "n": 22, "verb": "plan", "text": "break into tasks" },
+              { "n": 23, "verb": "build", "text": "tests drive the impl" },
+              { "n": 24, "verb": "review", "text": "quality gate passed" },
+              { "n": 25, "verb": "ship", "text": "launch checklist" }
+            ]
+          }
+        },
+        {
+          "index": "07",
+          "title": "COVERAGE",
+          "tag": "REPOS × JOBS",
+          "kind": "heat",
+          "data": {
+            "cols": ["SPEC", "TEST", "REVI", "AUDI", "NOTE", "DESI"],
+            "rows": ["MAT", "ADY", "CFL", "OBS", "GBL"],
+            "cells": [
+              [true, true, true, false, true, true],
+              [true, true, true, true, true, true],
+              [false, false, true, true, false, true],
+              [true, false, false, true, true, false],
+              [true, true, false, false, false, true]
+            ],
+            "footer": "5 / 6 JOBS · ADY"
+          }
+        },
+        {
+          "index": "08",
+          "title": "FREE STARS",
+          "tag": "GITHUB",
+          "kind": "big",
+          "data": { "value": "421.1K", "note": "stars · 0 prompts from zero" }
+        },
+        {
+          "index": "09",
+          "title": "SKILL.md",
+          "tag": "YAML",
+          "kind": "code",
+          "data": {
+            "file": "SKILL.md",
+            "tag": "YAML",
+            "lines": [
+              "---",
+              "name: shipping-and-launch",
+              "description: checklists before anything goes live",
+              "kind: SHIP",
+              "---",
+              "",
+              "# trigger",
+              "\"ship it\"",
+              "",
+              "-> load -> run -> verify"
+            ]
+          }
+        },
+        {
+          "index": "10",
+          "title": "TOKEN STREAM",
+          "tag": "LIVE",
+          "kind": "hist",
+          "data": {
+            "values": [22, 38, 51, 30, 44, 39, 63, 52, 41, 68, 58, 73, 46, 88, 62, 70, 95, 81],
+            "activeIndex": 17,
+            "rate": "2.1k tok/s",
+            "note": "ctx 43%",
+            "footer": "cache hit 94.0%"
+          }
+        },
+        {
+          "index": "11",
+          "title": "RUN METRICS",
+          "tag": "SESSION",
+          "kind": "metrics",
+          "data": {
+            "groups": [
+              { "label": "PHASES", "value": "6/6" },
+              { "label": "TASKS", "value": "12" },
+              { "label": "CHECKS", "value": "18" },
+              { "label": "FROM ZERO", "value": "0" }
+            ]
+          }
+        },
+        {
+          "index": "12",
+          "title": "GIT DIFF",
+          "tag": "HEAD",
+          "kind": "diff",
+          "data": {
+            "head": "commit b2daba",
+            "lines": [
+              { "sign": "+", "text": "agent-skills/shipping-and-launch/SKILL.md" },
+              { "sign": "+", "text": "+72 lines · 0 from scratch" },
+              { "sign": "-", "text": "0x3e88 21 8a 4d cc 1e 79 ed 59" },
+              { "sign": "+", "text": "0x3e88 31 22 47 fa fb d3 e4" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "ticker",
+      "text": "03.80 skill :: shipping-and-launch matched · adyosmani/agent-skills · coverage 5/6 · 421.1K stars · cache 94.0%"
+    },
+    {
+      "type": "heading",
+      "title": "What this snapshot measures",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "This page is a single moment in a repository audit: one matched skill, its repository, and the run that surfaced it. Every number on the console is a fact about that snapshot, not a projection. The graph counts nodes and links across five repositories; the coverage grid marks which job families each repository actually covers."
+    },
+    {
+      "type": "stats",
+      "items": [
+        { "label": "Repositories scanned", "value": "5", "note": "github" },
+        { "label": "Skills indexed", "value": "25", "note": "SKILL.md" },
+        { "label": "Stars in scope", "value": "548.4K" },
+        { "label": "Cost", "value": "$0", "note": "local reads" }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Reading the console",
+      "body": "Panels are independent: each one answers a different question about the same snapshot. The hero graph shows adjacency, not importance; the coverage grid is the only panel that scores completeness."
+    }
+  ]
+}

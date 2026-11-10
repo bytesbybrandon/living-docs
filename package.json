@@ -1,0 +1,33 @@
+{
+  "name": "living-docs",
+  "version": "0.1.0",
+  "description": "Turn a source document into a designed, self-contained living doc: academic paper, dark reading notes, or telemetry console. Ships an AXI CLI and an MCP server.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "living-docs-axi": "bin/living-docs-axi.js",
+    "living-docs-mcp": "bin/living-docs-mcp.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./render": "./src/render/index.js",
+    "./ingest": "./src/ingest/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "samples",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "samples": "node scripts/build-samples.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "unpdf": "^2.1.0"
+  }
+}

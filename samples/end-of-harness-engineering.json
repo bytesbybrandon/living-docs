@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "theme": "paper-dark",
+  "meta": {
+    "title": "The End of Harness Engineering",
+    "subtitle": "the loop writes the harness, the human writes the exam",
+    "author": "Reading notes on a 2026 paper by a team of Chinese researchers",
+    "date": "2026",
+    "kicker": "Reading notes · The End of Harness Engineering (2026)",
+    "runningHead": "Harness engineering · loop engineering",
+    "abstract": "A harness is the program written around a model, and writing it by hand has been the skill. The paper argues that this is ending. A hand-written harness is one guess about one task on one afternoon; once it ships, it runs for months, unread and unscored. In the loop the paper describes, the harness is a file that grades itself: a small 4B model reads what failed and proposes 8 edits, and only the edit that scores best on held-out questions survives. This repeats every round. The big model stays frozen; only the file around it changes.",
+    "indexTerms": [
+      "harness engineering",
+      "self-improving harness",
+      "held-out evaluation",
+      "frozen model",
+      "loop engineering"
+    ],
+    "footer": "living-docs · paper-dark"
+  },
+  "blocks": [
+    {
+      "type": "heading",
+      "title": "Introduction",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "Harness engineering has meant writing the program around the model by hand. A person studies one task, writes one file, and ships it. After that nobody reads the file and nobody scores it, so a wrong guess keeps running for months. The paper's answer is to stop writing that file by hand and let a loop write it, with the model itself untouched."
+    },
+    {
+      "type": "heading",
+      "title": "The loop",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "Each round starts from what failed. A small 4B model reads the failures and proposes 8 edits to the harness file. Every edit is scored on held-out questions, the best one is kept as the next version, and the other seven are dropped. The big model is never retrained: it stays frozen while the file around it changes."
+    },
+    {
+      "type": "figure",
+      "caption": "Two ways to write a harness. The hand-written path is a single guess; the loop-written path reads failures, proposes edits, and keeps only what survives held-out scoring.",
+      "spec": "diagram",
+      "span": "page",
+      "diagram": {
+        "width": 1000,
+        "height": 330,
+        "nodes": [
+          { "id": "person", "label": "person", "sub": "one afternoon", "x": 40, "y": 130, "w": 130, "h": 62, "icon": "clock" },
+          { "id": "v0", "label": "harness v0", "sub": "one guess", "x": 214, "y": 130, "w": 140, "h": 62, "icon": "file" },
+          { "id": "unscored", "label": "unscored", "sub": "never graded", "x": 78, "y": 240, "w": 150, "h": 52, "kind": "dashed" },
+          { "id": "frozen", "label": "frozen big model", "sub": "e.g. Claude, never updated", "x": 402, "y": 130, "w": 180, "h": 62, "kind": "accent", "icon": "star" },
+          { "id": "failures", "label": "failures", "sub": "what went wrong", "x": 402, "y": 28, "w": 150, "h": 54, "kind": "accent" },
+          { "id": "editor", "label": "4B editor", "sub": "reads the failures", "x": 592, "y": 28, "w": 160, "h": 54 },
+          { "id": "held", "label": "held-out questions", "x": 786, "y": 28, "w": 170, "h": 54 },
+          { "id": "best", "label": "best edit kept", "sub": "1 of 8 survives", "x": 786, "y": 130, "w": 170, "h": 54 },
+          { "id": "file", "label": "harness file", "sub": "now v3", "x": 786, "y": 236, "w": 170, "h": 56, "icon": "file" }
+        ],
+        "edges": [
+          { "from": "person", "to": "v0", "style": "arrow" },
+          { "from": "v0", "to": "frozen", "style": "arrow" },
+          { "from": "frozen", "to": "failures", "style": "arrow", "label": "next round" },
+          { "from": "failures", "to": "editor", "style": "arrow" },
+          { "from": "editor", "to": "held", "style": "arrow", "label": "8 candidate edits" },
+          { "from": "held", "to": "best", "style": "arrow" },
+          { "from": "best", "to": "file", "style": "arrow", "label": "becomes v3" },
+          { "from": "file", "to": "frozen", "style": "dashed", "label": "runs the task" }
+        ],
+        "groups": [
+          { "label": "(a) hand-written harness", "nodes": ["person", "v0", "unscored"], "style": "outline" }
+        ]
+      }
+    },
+    {
+      "type": "algorithm",
+      "title": "One round of the loop",
+      "lines": [
+        { "text": "Input: harness h_0, frozen model M, scoring set Q" },
+        { "text": "F := failures of M running h_n on the task set" },
+        { "text": "E := 8 edits proposed by the 4B editor from F" },
+        { "text": "for each e in E: s(e) := score of e on Q", "highlight": true },
+        { "text": "h_{n+1} := h_n + the e with the highest s(e)" },
+        { "text": "n := n + 1; repeat" }
+      ]
+    },
+    {
+      "type": "heading",
+      "title": "What changes",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "Three parties touch the system and only one of them is a person. The human writes the scoring set: the questions the harness is graded on. The 4B model writes every edit to the harness file. The big model writes nothing; it is the same frozen model in every round, and only the file around it changes."
+    },
+    {
+      "type": "table",
+      "caption": "Who writes what in the loop",
+      "columns": [
+        { "label": "Party" },
+        { "label": "Writes" },
+        { "label": "How often" }
+      ],
+      "rows": [
+        ["Human", "the scoring set", "once, before the loop"],
+        ["Loop, 4B model", "harness edits", "8 per round"],
+        ["Big model", "nothing, frozen", "runs every round"]
+      ]
+    },
+    {
+      "type": "figure",
+      "caption": "Held-out score by round. Each round the editor proposes eight edits; the seven rejected are grey, the kept one is orange. The harness changes only when an edit wins.",
+      "spec": "chart",
+      "chart": {
+        "kind": "scatter",
+        "height": 380,
+        "xLabel": "round",
+        "yLabel": "held-out score",
+        "yMax": 6,
+        "series": [
+          {
+            "name": "kept edit",
+            "kind": "line",
+            "tone": "accent",
+            "points": [
+              { "x": 0, "y": 1 },
+              { "x": 1, "y": 1.6 },
+              { "x": 2, "y": 2.4 },
+              { "x": 3, "y": 3.2 },
+              { "x": 4, "y": 3.9 },
+              { "x": 5, "y": 4.4 },
+              { "x": 6, "y": 4.8 }
+            ]
+          },
+          {
+            "name": "rejected edits",
+            "kind": "dot",
+            "tone": "muted",
+            "points": [
+              { "x": 1, "y": 1.1 }, { "x": 1, "y": 1.3 }, { "x": 1, "y": 1.45 },
+              { "x": 2, "y": 1.9 }, { "x": 2, "y": 2.1 }, { "x": 2, "y": 2.2 },
+              { "x": 3, "y": 2.5 }, { "x": 3, "y": 2.7 }, { "x": 3, "y": 3.05 },
+              { "x": 4, "y": 3.1 }, { "x": 4, "y": 3.3 }, { "x": 4, "y": 3.6 },
+              { "x": 5, "y": 3.7 }, { "x": 5, "y": 4.0 }, { "x": 5, "y": 4.2 },
+              { "x": 6, "y": 4.1 }, { "x": 6, "y": 4.5 }, { "x": 6, "y": 4.6 }
+            ]
+          }
+        ],
+        "annotations": [
+          { "text": "hand-written baseline v0", "x": 0.2, "y": 0.9 }
+        ]
+      }
+    },
+    {
+      "type": "heading",
+      "title": "Conclusion",
+      "level": 2
+    },
+    {
+      "type": "prose",
+      "markdown": "When a loop writes the harness, frameworks become disposable and the exam becomes the job. The order of work flips: first the questions the harness will be graded on, then the code. That inversion is the paper's real claim, and it is a governance claim as much as an engineering one, because the scoring set is the artifact a human still owns."
+    },
+    {
+      "type": "callout",
+      "tone": "takeaway",
+      "title": "Takeaway",
+      "body": "Write the exam before the code."
+    },
+    {
+      "type": "footnotes",
+      "items": [
+        "One guess about one task on one afternoon.",
+        "4B: a model of about four billion parameters, small next to the frozen model it edits for.",
+        "Held-out questions are kept out of the editing step and used only for scoring."
+      ]
+    }
+  ]
+}
