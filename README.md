@@ -18,6 +18,19 @@ Three themes:
 | `paper-dark` | cream on carbon, orange accent, numbered sections, algorithm boxes, takeaway strip | paper summaries, essays, annotated readings |
 | `hud` | monospaced 12-panel console, cyan accents, animated graph hero, live clock | repo audits, skill catalogs, system snapshots, run reports |
 
+## Install
+
+```bash
+npm install -g @bytesbybrandon/living-docs
+```
+
+Or run without installing:
+
+```bash
+npx -y -p @bytesbybrandon/living-docs living-docs-axi themes
+npx -y -p @bytesbybrandon/living-docs living-docs-mcp
+```
+
 ## Quick start
 
 ```bash
@@ -117,12 +130,27 @@ Reduced-motion preferences disable the console animation.
 
 ## MCP server
 
+Published package (recommended):
+
+```json
+{
+  "mcpServers": {
+    "living-docs": {
+      "command": "npx",
+      "args": ["-y", "-p", "@bytesbybrandon/living-docs", "living-docs-mcp"]
+    }
+  }
+}
+```
+
+Local checkout:
+
 ```json
 {
   "mcpServers": {
     "living-docs": {
       "command": "node",
-      "args": ["C:/Users/brand/Desktop/living-docs/bin/living-docs-mcp.js"]
+      "args": ["<absolute-checkout>/bin/living-docs-mcp.js"]
     }
   }
 }
@@ -131,10 +159,11 @@ Reduced-motion preferences disable the console animation.
 Tools: `living_docs_themes`, `living_docs_schema`, `living_docs_ingest`, `living_docs_render`, `living_docs_preview`.
 `living_docs_render` accepts a model object, a model path, or a source to draft from.
 
-## Reactive skill
+## Reactive workflow
 
-`living-docs` (authored in `~/Desktop/skills/living-docs`) runs the end-to-end workflow: intake, outline, theme and layout plan, model authoring, validation, render, human review, finalize.
-It calls this CLI; it does not reimplement rendering.
+An optional reactive skill wraps the same pipeline: intake, outline, theme and style plan, model authoring, validation, render, human review, finalize.
+It calls this CLI and does not reimplement rendering.
+The skill is maintained separately from this package; `src/model/schema.js` and the AXI commands below are the stable engine surface.
 
 ## Guarantees
 

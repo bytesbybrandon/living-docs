@@ -1,5 +1,6 @@
 node_modules/
-docs/
+docs/*.html
+docs/*.json
 *.log
 .DS_Store
 .docs/
