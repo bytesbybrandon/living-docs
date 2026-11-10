@@ -193,8 +193,8 @@
       { "at": 7.6, "dur": 2.2, "do": "highlight", "target": "mark:frozen" },
       { "at": 7.8, "dur": 1, "do": "focus", "target": "loop/frozen" },
       { "at": 8.6, "dur": 1.1, "do": "focus", "target": "loop/file" },
-      { "at": 10.2, "dur": 1.6, "do": "camera", "target": "loop/editor", "zoom": 2.2 },
-      { "at": 12.2, "dur": 1.4, "do": "camera", "target": "loop/best", "zoom": 2.2 },
+      { "at": 10.2, "dur": 1.6, "do": "camera", "target": "loop/editor" },
+      { "at": 12.2, "dur": 1.4, "do": "camera", "target": "loop/best" },
       { "at": 14, "dur": 1.8, "do": "camera", "target": "score" },
       { "at": 15.4, "dur": 2, "do": "focus", "target": "score" },
       { "at": 17.8, "dur": 1.8, "do": "camera", "target": "page" }

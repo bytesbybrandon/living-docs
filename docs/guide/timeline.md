@@ -1,7 +1,7 @@
 # Timeline and video
 
 A timeline makes a doc move in step with its own text.
-Cues highlight a source sentence, light up the figure part it describes, count numbers up, type text out, and push a camera onto a block.
+Cues highlight a source sentence, light up the figure part it describes, count numbers up, type text out, and scroll the video frame to a block.
 The same timeline plays on the live page and records to MP4, WebM, or GIF.
 
 ## Marks and ids
@@ -22,11 +22,11 @@ Ids use lowercase letters, digits, and hyphens, and must be unique.
 | `do` | What it does |
 | --- | --- |
 | `highlight` | Sweeps a highlighter across a mark or block, then leaves a faint underline. |
-| `focus` | Lights up a block or part and dims its siblings. |
-| `reveal` | Fades and rises a block or part in at the cue time. |
+| `focus` | Outlines a block or part and dims its siblings. The glow stays inside the block. |
+| `reveal` | Fades a block or part in at the cue time, without moving it. |
 | `count` | Counts the numbers inside the target up from zero. |
-| `type` | Types the target's text out. |
-| `camera` | Video only: pushes onto a block or part, or back to `page`. `zoom` sets the scale. |
+| `type` | Types the target's text out. The full text keeps its space, so nothing reflows. |
+| `camera` | Video only: scrolls the frame to a block or part, or back to `page`. The page stays flat at 100%; `zoom` is an opt-in that scales it. |
 | `activate` | HUD only: glides the scene crosshair to a label. |
 
 Targets are `mark:<id>`, `<blockId>`, `<blockId>/<part>`, or `page` for the camera.
@@ -39,7 +39,7 @@ On the live page, a block whose cue comes up while it is still below the fold wa
 
 ## Drafted cues
 
-`ingest --draft` writes a timeline from the source: up to four abstract sentences and five section leads are marked and highlighted in reading order, the camera visits each lead, and stats count up.
+`ingest --draft` writes a timeline from the source: up to four abstract sentences and five section leads are marked and highlighted in reading order, the frame scrolls to each lead, and stats count up.
 Pass `--static` for a draft without cues.
 Edit or replace the drafted cues like any other part of the model.
 

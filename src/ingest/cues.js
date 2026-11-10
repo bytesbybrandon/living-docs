@@ -1,5 +1,5 @@
 // Draft a timeline from the source itself: mark key sentences in reading order,
-// highlight them one after another, push the stage camera onto section leads,
+// highlight them one after another, pan the stage camera to section leads,
 // and count up headline numbers. Deterministic: same model in, same cues out.
 
 const STEP = 2.4;

@@ -336,7 +336,7 @@ export const CUE_ACTIONS = {
   reveal: 'fade and rise a block or part into view at the cue time; hidden before it',
   count: 'count the numbers inside the target up from zero',
   type: 'type the text of the target out character by character',
-  camera: 'stage video only: push the camera onto a block or part, or back to "page"',
+  camera: 'stage video only: scroll the frame to a block or part, or back to "page" (flat at 100% unless zoom is set)',
   activate: 'hud scene only: glide the crosshair to a scene label (target "<sceneId>/<label>")'
 };
 
@@ -348,7 +348,7 @@ export const TIMELINE = {
     dur: num('seconds the cue runs, default 1.2', { optional: true }),
     do: oneOf(Object.keys(CUE_ACTIONS), 'action'),
     target: str('"mark:<id>", "<blockId>", "<blockId>/<part>" (diagram node id, panel index, scene label), or "page" for camera'),
-    zoom: num('camera only: scale, default fits the target', { optional: true })
+    zoom: num('camera only: opt-in scale, default 1 (flat)', { optional: true })
   }, 'cue'), 'cues in any order')
 };
 
@@ -360,6 +360,21 @@ export const THEMES = {
   'paper-dark': {
     summary: 'Reading notes: cream on carbon, orange accent, rules, algorithm boxes, takeaway strip.',
     best: 'paper summaries, essays, annotated readings'
+  },
+  'field-notes': {
+    base: 'paper-light',
+    summary: 'Warm cream paper, olive rules, italic titles.',
+    best: 'field reports, lab notes, reading journals'
+  },
+  editorial: {
+    base: 'paper-light',
+    summary: 'Magazine masthead: oversized left-set title, heavy rules, signal red.',
+    best: 'essays, features, opinion pieces'
+  },
+  blueprint: {
+    base: 'paper-dark',
+    summary: 'Drafting-table blue with a faint grid and cyan linework.',
+    best: 'architecture notes, system designs, specs'
   },
   hud: {
     summary: 'Telemetry console: monospaced 12-panel grid, cyan accents, graph hero, live clock.',

@@ -86,7 +86,7 @@ function rgbToHsl({ r, g, b }) {
   return { h: hue, s: saturation, l: lightness };
 }
 
-function hslToRgb({ h, s, l }) {
+export function hslToRgb({ h, s, l }) {
   if (s === 0) {
     const value = l * 255;
     return { r: value, g: value, b: value };

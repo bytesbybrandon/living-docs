@@ -17,6 +17,7 @@ class UsageError extends Error {}
 
 const FLAGS = {
   '--theme': 'value',
+  '--seed': 'value',
   '--out': 'value', '-o': 'value',
   '--section': 'value',
   '--url': 'value',
@@ -221,9 +222,10 @@ async function ingest({ args, flags }) {
   ];
 
   if (flags.draft) {
-    const theme = flags.theme || 'paper-dark';
-    if (!THEMES[theme]) throw new UsageError(`unknown theme "${theme}" (one of: ${Object.keys(THEMES).join(', ')})`);
-    const model = draftModel(ingested, { theme, cues: !flags.static });
+    if (flags.theme && !THEMES[flags.theme]) throw new UsageError(`unknown theme "${flags.theme}" (one of: ${Object.keys(THEMES).join(', ')})`);
+    if (flags.seed && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(flags.seed)) throw new UsageError('--seed must be a hex color like #2f6f8f');
+    const model = draftModel(ingested, { theme: flags.theme, seed: flags.seed, cues: !flags.static });
+    const theme = model.theme;
     const validation = validateDoc(model);
     if (!validation.ok) {
       return [`error: draft model is invalid`, formatErrors(validation.errors)].join('\n');
@@ -387,7 +389,7 @@ async function preview({ args, flags }) {
 }
 
 const COMMAND_HELP = {
-  ingest: 'ingest <path|url|-> [--url <url>] [--text <text>] [--outline] [--section <n|id>] [--draft] [--static] [--theme <name>] [-o <file>] [--max-chars <n>] [--full]',
+  ingest: 'ingest <path|url|-> [--url <url>] [--text <text>] [--outline] [--section <n|id>] [--draft] [--static] [--theme <name>] [--seed <hex>] [-o <file>] [--max-chars <n>] [--full]',
   render: 'render <model.json|-> [--theme <name>] [-o <file>] [--stdout] [--format html|mp4|webm|gif] [--size 1080x1350] [--fps 30] [--scale 1]',
   validate: 'validate <model.json|->',
   preview: 'preview [file|dir] [--port <n>] [--no-open]',

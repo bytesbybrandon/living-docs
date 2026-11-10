@@ -18,6 +18,11 @@ The draft path writes cues from the source so new docs move without hand authori
 
 Paper themes may now animate, but only when a doc carries a timeline.
 
+Motion never changes layout.
+Cues fade, outline, and dim inside their own block; nothing rises, scales, or glows outside its box, and typed text keeps its full space.
+The video camera scrolls at 100% unless a cue sets `zoom`.
+A browser test samples the timeline and asserts every block and part keeps its box.
+
 Alternatives rejected:
 
 - Real-time screen recording: drops frames and cannot reproduce a render.

@@ -142,7 +142,7 @@ test('seek(t) is a pure function of t in the browser', { skip: !chromiumReady &&
       return {
         hl: mark.style.getPropertyValue('--ld-hl'),
         stats: document.querySelector('[data-cue="nums"]').textContent.replace(/\s+/g, ' ').trim(),
-        typed: document.querySelector('[data-cue="body"]').textContent,
+        typed: [...(CSS.highlights.get('ld-untyped') || [])].map(range => range.toString()).join(''),
         focus: part.style.getPropertyValue('--ld-f'),
         cam: document.querySelector('.ld-cam').style.transform
       };
@@ -150,17 +150,45 @@ test('seek(t) is a pure function of t in the browser', { skip: !chromiumReady &&
     const start = await probe(0);
     assert.equal(start.hl, '0.0000');
     assert.match(start.stats, /^0 edits 0\.00 score/);
-    assert.equal(start.typed, '');
+    assert.equal(start.typed, 'Typed text appears here.');
     const mid = await probe(2.75);
     assert.equal(mid.focus, '1.0000');
     assert.match(mid.stats, /1,280 edits 4\.25 score/);
-    assert.equal(mid.typed, 'Typed text appears here.');
+    assert.equal(mid.typed, '');
     const zoomed = await probe(4);
     assert.notEqual(zoomed.cam, start.cam);
     assert.deepEqual(await probe(2.75), mid);
     const end = await probe(6.5);
     assert.match(end.cam, /scale\(1\)/);
     assert.equal(end.focus, '0.0000');
+  } finally {
+    await browser.close();
+  }
+});
+
+test('cues never move or zoom the page, so figures and text stay flat', { skip: !chromiumReady && 'playwright chromium not installed' }, async () => {
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+    await page.setContent(renderDoc(base(), { stage: true }).html.replace('<head>', '<head><script>window.__ldCapture = true;</script>'));
+    const layout = t => page.evaluate(at => {
+      window.__ld.seek(at);
+      const cam = document.querySelector('.ld-cam').getBoundingClientRect();
+      return {
+        scale: document.querySelector('.ld-cam').style.transform.match(/scale\(([\d.]+)\)/)[1],
+        boxes: [...document.querySelectorAll('[data-cue], [data-part]')].map(el => {
+          const r = el.getBoundingClientRect();
+          return [r.left - cam.left, r.top - cam.top, r.width, r.height].map(n => Math.round(n));
+        })
+      };
+    }, t);
+    const settled = await layout(6.5);
+    for (let t = 0; t <= 6.5; t += 0.25) {
+      const frame = await layout(t);
+      assert.equal(Number(frame.scale), 1, `scale at ${t}s`);
+      assert.deepEqual(frame.boxes, settled.boxes, `layout at ${t}s`);
+    }
   } finally {
     await browser.close();
   }

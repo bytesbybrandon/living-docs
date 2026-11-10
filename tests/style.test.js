@@ -101,3 +101,17 @@ test('single layout collapses paper columns and is ignored by the console', () =
   assert.equal(invalid.ok, false);
   assert.ok(invalid.errors.some(error => error.path === 'meta.style.layout'));
 });
+
+test('curated looks keep readable contrast and render on their base theme', async () => {
+  const { VARIANTS } = await import('../src/render/themes/variants.js');
+  const model = JSON.parse(fs.readFileSync('samples/end-of-harness-engineering.json', 'utf8'));
+  for (const [name, look] of Object.entries(VARIANTS)) {
+    const p = look.palette;
+    assert.ok(contrastRatio(p.ink, p.bg) >= 7, `${name} ink`);
+    assert.ok(contrastRatio(p.muted, p.bg) >= 4.5, `${name} muted`);
+    assert.ok(contrastRatio(p.accent, p.bg) >= 4.5, `${name} accent`);
+    const result = renderDoc(model, { theme: name });
+    assert.ok(result.ok, name);
+    assert.match(result.html, new RegExp(`class="theme-paper-(light|dark) theme-${name} `));
+  }
+});

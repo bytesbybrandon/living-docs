@@ -24,15 +24,15 @@ const PROPS = [['r', 1], ['f', 0], ['dim', 0], ['hl', 0], ['ha', 0], ['hr', 0]];
 const CSS = `
 ${PROPS.map(([name, initial]) => `@property --ld-${name}{syntax:'<number>';inherits:false;initial-value:${initial}}`).join('\n')}
 .ld-mark{--ld-hlc:color-mix(in srgb,var(--ld-accent) calc(var(--ld-ha)*42%),transparent);background-image:linear-gradient(var(--ld-hlc),var(--ld-hlc));background-repeat:no-repeat;background-size:calc(var(--ld-hl)*100%) 100%;text-decoration-line:underline;text-decoration-color:color-mix(in srgb,var(--ld-accent) calc(var(--ld-hr)*75%),transparent);text-decoration-thickness:1.5px;text-underline-offset:.24em;border-radius:2px}
-.ld-t:not(svg *):not(.ld-mark){opacity:calc(var(--ld-r)*(1 - var(--ld-dim)*.55 + var(--ld-f)*.55));translate:0 calc((1 - var(--ld-r))*16px);box-shadow:0 0 0 calc(var(--ld-f)*1.5px) color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*100%),transparent),0 0 calc(var(--ld-f)*34px) calc(var(--ld-f)*2px) color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*32%),transparent),inset 0 0 0 9999px color-mix(in srgb,var(--ld-accent) calc(var(--ld-ha)*9%),transparent)}
-svg .ld-t{filter:opacity(calc(var(--ld-r)*(1 - var(--ld-dim)*.62 + var(--ld-f)*.62))) drop-shadow(0 0 calc(var(--ld-f)*9px) color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*100%),transparent));translate:0 calc((1 - var(--ld-r))*10px)}
+.ld-t:not(svg *):not(.ld-mark){opacity:calc(var(--ld-r)*(1 - var(--ld-dim)*.4 + var(--ld-f)*.4));outline:calc(var(--ld-f)*2px) solid color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*100%),transparent);outline-offset:-2px;box-shadow:inset 0 0 calc(var(--ld-f)*30px) color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*26%),transparent),inset 0 0 0 9999px color-mix(in srgb,var(--ld-accent) calc(var(--ld-ha)*9%),transparent)}
+svg .ld-t{filter:opacity(calc(var(--ld-r)*(1 - var(--ld-dim)*.4 + var(--ld-f)*.4))) drop-shadow(0 0 calc(var(--ld-f)*5px) color-mix(in srgb,var(--ld-accent) calc(var(--ld-f)*100%),transparent))}
 .ld-count{font-variant-numeric:tabular-nums}
-.ld-typing::after{content:"";display:inline-block;width:.5em;height:1.05em;margin-left:2px;vertical-align:-.14em;background:var(--ld-accent)}
+::highlight(ld-untyped){color:transparent}
 .scene-label.is-matched{color:var(--ld-accent)}
 html.ld-stage,html.ld-stage body{overflow:hidden!important}
 html.ld-stage ::-webkit-scrollbar{display:none}
 .ld-cam{transform-origin:0 0}
-@media print{.ld-t{opacity:1!important;filter:none!important;translate:none!important;box-shadow:none!important}.ld-mark{background:none!important}.ld-cam{transform:none!important}}`;
+@media print{.ld-t{opacity:1!important;filter:none!important;outline:none!important;box-shadow:none!important}.ld-mark{background:none!important}.ld-cam{transform:none!important}}`;
 
 const RUNTIME = `
 (function(){
@@ -143,6 +143,7 @@ const RUNTIME = `
         put(el, 'type', p);
       }
     }
+    var untyped = [];
     for (i = 0; i < managed.length; i++) {
       el = managed[i];
       var state = el.__ld;
@@ -152,11 +153,16 @@ const RUNTIME = `
         else el.style.setProperty('--ld-' + name, state[name].toFixed(4));
       }
       if (state.count != null) el.__ldText.forEach(function(n){ n.node.nodeValue = countText(n.text, state.count); });
-      if (state.type != null) {
+      if (state.type != null && window.Highlight && window.CSS && CSS.highlights) {
         var left = Math.round(state.type * el.__ldText.reduce(function(sum, n){ return sum + n.text.length; }, 0));
-        el.__ldText.forEach(function(n){ n.node.nodeValue = n.text.slice(0, Math.max(0, left)); left -= n.text.length; });
+        el.__ldText.forEach(function(n){
+          if (left < n.text.length) { var r = document.createRange(); r.setStart(n.node, Math.max(0, left)); r.setEnd(n.node, n.text.length); untyped.push(r); }
+          left -= n.text.length;
+        });
       }
-      el.classList.toggle('ld-typing', state.type != null && state.type > 0 && state.type < 1);
+    }
+    if (window.Highlight && window.CSS && CSS.highlights) {
+      if (untyped.length) CSS.highlights.set('ld-untyped', new Highlight(...untyped)); else CSS.highlights.delete('ld-untyped');
     }
     scenes.forEach(function(scene){ moveScene(scene, t0, shift); });
     if (cam) moveCamera(t0);
@@ -197,9 +203,8 @@ const RUNTIME = `
       var goal = { z: 1, x: 0, y: 0 };
       if (item.el) {
         var r = rectOf(item.el);
-        var z = item.cue.zoom || Math.min(W * .86 / r.w, H * .78 / r.h);
-        z = Math.max(1, Math.min(3, z));
-        goal = { z: z, x: W / 2 - (r.x + r.w / 2) * z, y: H / 2 - (r.y + r.h / 2) * z };
+        var z = Math.max(1, Math.min(3, item.cue.zoom || 1));
+        goal = { z: z, x: W / 2 - (r.x + r.w / 2) * z, y: r.h * z > H * .9 ? 24 - r.y * z : H / 2 - (r.y + r.h / 2) * z };
         goal.x = Math.min(0, Math.max(W - pageW * z, goal.x));
         goal.y = Math.min(0, Math.max(H - pageH * z, goal.y));
       }

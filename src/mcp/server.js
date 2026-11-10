@@ -34,7 +34,7 @@ function textResult(text) {
 const TOOLS = [
   {
     name: 'living_docs_themes',
-    description: 'List the three living-doc themes and what each is best for.',
+    description: 'List the living-doc themes and what each is best for.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false }
   },
   {
@@ -58,7 +58,8 @@ const TOOLS = [
         section: { type: 'string', description: 'Return one section: 1-based index or id' },
         draft: { type: 'boolean', description: 'Include a draft document model built from the source' },
         static: { type: 'boolean', description: 'Draft without the auto-generated timeline cues' },
-        theme: { type: 'string', enum: Object.keys(THEMES), description: 'Theme recorded on the draft' },
+        seed: { type: 'string', description: 'Hex accent seed for the draft, overriding the one derived from the title' },
+        theme: { type: 'string', enum: Object.keys(THEMES), description: 'Theme for the draft; omit to let the source pick a look' },
         out: { type: 'string', description: 'Write the draft model JSON to this path' },
         max_chars: { type: 'number', description: 'Section text limit, default 12000' }
       },
@@ -166,8 +167,7 @@ async function handle(name, args = {}) {
         toon('sections', ['index', 'id', 'title', 'words'], outline.sections.map(section => [section.index, section.id, section.title, section.words]))
       ];
       if (args.draft) {
-        const theme = args.theme || 'paper-dark';
-        const model = draftModel(ingested, { theme, cues: !args.static });
+        const model = draftModel(ingested, { theme: args.theme, seed: args.seed, cues: !args.static });
         const validation = validateDoc(model);
         if (!validation.ok) return toolError(`draft model invalid:\n${formatErrors(validation.errors)}`);
         if (args.out) {
@@ -190,7 +190,7 @@ async function handle(name, args = {}) {
       if (!model && args.source) {
         const isUrl = /^https?:\/\//i.test(args.source);
         const ingested = await ingestSource(isUrl ? { url: args.source } : { path: args.source });
-        model = draftModel(ingested, { theme: args.theme || 'paper-dark' });
+        model = draftModel(ingested, { theme: args.theme });
       }
       if (!model) return toolError('pass model, model_path, or source');
       const theme = args.theme || model.theme || 'paper-light';
@@ -259,7 +259,7 @@ export function createServer() {
     { name: 'living-docs', version: '0.1.0' },
     {
       capabilities: { tools: {} },
-      instructions: 'Turn source documents into designed living docs. Ingest to get an outline, author a document model against the schema, then render with paper-light, paper-dark, or hud.'
+      instructions: 'Turn source documents into designed living docs. Ingest to get an outline, author a document model against the schema, then render with a theme from living_docs_themes. A draft without a theme picks a look from the source.'
     }
   );
 

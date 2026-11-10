@@ -32,7 +32,7 @@ The package ships a stdio MCP server over the same core as the CLI.
 
 | Tool | Purpose |
 | --- | --- |
-| `living_docs_themes` | list the three themes and what each is best for |
+| `living_docs_themes` | list the themes (three structural bases plus curated looks) and what each is best for |
 | `living_docs_schema` | block fields, or one block in detail |
 | `living_docs_ingest` | outline a source, optionally draft a model with timeline cues (`static` skips them) |
 | `living_docs_render` | validate and write HTML, or `format` mp4, webm, or gif, from a model, a model path, or a source |

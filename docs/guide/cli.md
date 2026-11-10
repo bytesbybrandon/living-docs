@@ -17,7 +17,8 @@ living-docs-axi preview [dir]           serve built docs with an index
 
 | Flag | Purpose |
 | --- | --- |
-| `--theme <name>` | `paper-light`, `paper-dark`, or `hud` |
+| `--theme <name>` | `paper-light`, `paper-dark`, `hud`, or a curated look: `field-notes`, `editorial`, `blueprint`. With `--draft`, omitted means the source picks |
+| `--seed <hex>` | with `--draft`: accent seed, overriding the one derived from the title |
 | `-o`, `--out <file>` | output path |
 | `--section <n\|id>` | ingest one section |
 | `--max-chars <n>` | cap section text, default 12000 |

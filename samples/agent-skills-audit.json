@@ -303,7 +303,7 @@
       { "at": 8.8, "dur": 1.8, "do": "focus", "target": "grid/12" },
       { "at": 10.8, "dur": 1.4, "do": "activate", "target": "scene/interview-me" },
       { "at": 11.4, "dur": 1.8, "do": "focus", "target": "grid/04" },
-      { "at": 13.4, "dur": 1.4, "do": "camera", "target": "grid/08", "zoom": 2 },
+      { "at": 13.4, "dur": 1.4, "do": "camera", "target": "grid/08" },
       { "at": 13.6, "dur": 1.2, "do": "count", "target": "grid/08" },
       { "at": 14.9, "dur": 1, "do": "camera", "target": "page" }
     ]
