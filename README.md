@@ -18,6 +18,19 @@ Three themes:
 | `paper-dark` | cream on carbon, orange accent, numbered sections, algorithm boxes, takeaway strip | paper summaries, essays, annotated readings |
 | `hud` | monospaced 12-panel console, cyan accents, animated graph hero, live clock | repo audits, skill catalogs, system snapshots, run reports |
 
+## Install
+
+```bash
+npm install -g @bytesbybrandon/living-docs
+```
+
+Or run without installing:
+
+```bash
+npx -y -p @bytesbybrandon/living-docs living-docs-axi themes
+npx -y -p @bytesbybrandon/living-docs living-docs-mcp
+```
+
 ## Quick start
 
 ```bash
@@ -116,6 +129,21 @@ Reduced-motion preferences disable the console animation.
 ```
 
 ## MCP server
+
+Published package (recommended):
+
+```json
+{
+  "mcpServers": {
+    "living-docs": {
+      "command": "npx",
+      "args": ["-y", "-p", "@bytesbybrandon/living-docs", "living-docs-mcp"]
+    }
+  }
+}
+```
+
+Local checkout:
 
 ```json
 {

@@ -1,12 +1,32 @@
 {
-  "name": "living-docs",
+  "name": "@bytesbybrandon/living-docs",
   "version": "0.1.0",
   "description": "Turn a source document into a designed, self-contained living doc: academic paper, dark reading notes, or telemetry console. Ships an AXI CLI and an MCP server.",
   "type": "module",
   "license": "MIT",
+  "author": "Brandon D. Phillips",
   "engines": {
     "node": ">=20"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bytesbybrandon/living-docs.git"
+  },
+  "homepage": "https://github.com/bytesbybrandon/living-docs#readme",
+  "bugs": {
+    "url": "https://github.com/bytesbybrandon/living-docs/issues"
+  },
+  "keywords": [
+    "agent",
+    "axi",
+    "mcp",
+    "documentation",
+    "html",
+    "pdf",
+    "living-docs",
+    "telemetry",
+    "paper"
+  ],
   "bin": {
     "living-docs-axi": "bin/living-docs-axi.js",
     "living-docs-mcp": "bin/living-docs-mcp.js"
@@ -20,8 +40,12 @@
     "bin",
     "src",
     "samples",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "node --test \"tests/**/*.test.js\"",
     "samples": "node scripts/build-samples.js"
