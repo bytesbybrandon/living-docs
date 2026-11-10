@@ -157,6 +157,7 @@ export const BLOCKS = {
       spec: oneOf(['diagram', 'chart'], 'which generator to use'),
       diagram: { ...diagramSpec, optional: true },
       chart: { ...chartSpec, optional: true },
+      motion: oneOf(['none', 'draw', 'reveal', 'steps'], 'static CSS animation for the figure; print and reduced motion stay static', { optional: true }),
       span: oneOf(['column', 'page'], 'column width or full page', { optional: true })
     },
     check(value, path, err) {

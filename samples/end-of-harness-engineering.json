@@ -42,6 +42,7 @@
       "type": "figure",
       "caption": "Two ways to write a harness. The hand-written path is a single guess; the loop-written path reads failures, proposes edits, and keeps only what survives held-out scoring.",
       "spec": "diagram",
+      "motion": "draw",
       "span": "page",
       "diagram": {
         "width": 1000,
@@ -111,6 +112,7 @@
       "type": "figure",
       "caption": "Held-out score by round. Each round the editor proposes eight edits; the seven rejected are grey, the kept one is orange. The harness changes only when an edit wins.",
       "spec": "chart",
+      "motion": "steps",
       "chart": {
         "kind": "scatter",
         "height": 380,

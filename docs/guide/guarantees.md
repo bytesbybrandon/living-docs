@@ -23,6 +23,7 @@ Only `http(s)`, `mailto:`, `#`, and relative URLs survive as links.
 ## Print ready
 
 Paper themes ship `@page` rules and keep figures, tables, algorithms, and callouts unbroken across pages.
+Figure motion freezes to its final frame in print and under reduced-motion preferences.
 
 ## Known limits
 

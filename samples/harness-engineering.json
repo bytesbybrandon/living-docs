@@ -41,6 +41,7 @@
       "type": "figure",
       "caption": "An agent is a model plus a harness of seven subsystems. The harness owns everything outside the weights.",
       "spec": "diagram",
+      "motion": "draw",
       "diagram": {
         "width": 1000,
         "height": 440,
@@ -118,6 +119,7 @@
       "type": "figure",
       "caption": "Extensibility standards across eleven coding harnesses. Counts include partial support, greyed in the paper's original figure.",
       "spec": "chart",
+      "motion": "steps",
       "chart": {
         "kind": "bar",
         "height": 340,
@@ -163,6 +165,7 @@
       "type": "figure",
       "caption": "Convergence becomes imitation: Codex reads Claude Code's hook vocabulary while OpenHands reads its plugin format.",
       "spec": "diagram",
+      "motion": "draw",
       "diagram": {
         "width": 1000,
         "height": 300,
