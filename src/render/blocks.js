@@ -17,19 +17,53 @@ export function createContext({ theme, palette, baseDir, model }) {
 
 const spanClass = block => (block.span === 'page' ? ' span-page' : '');
 
+function motionCss(id, motion) {
+  if (!motion || motion === 'none') return '';
+  const scope = `#${id}`;
+  const reset = `
+@media (prefers-reduced-motion: reduce){
+  ${scope} *{animation:none !important;opacity:1 !important;transform:none !important;stroke-dashoffset:0 !important}
+}
+@media print{
+  ${scope} *{animation:none !important;opacity:1 !important;transform:none !important;stroke-dashoffset:0 !important}
+}`;
+  const keyframes = `@keyframes ld-draw{to{stroke-dashoffset:0}}@keyframes ld-fade{to{opacity:1}}@keyframes ld-grow{to{transform:scaleY(1)}}`;
+  if (motion === 'draw') {
+    return `<style>${keyframes}
+${scope} .ld-line{stroke-dasharray:1;stroke-dashoffset:1;animation:ld-draw 1000ms ease-out forwards}
+${scope} .d-node,${scope} .ch-point,${scope} .ch-bar,${scope} .ch-legend,${scope} .d-edge-labels{opacity:0.15;animation:ld-fade 420ms ease-out forwards;animation-delay:calc(var(--i,0)*70ms + 420ms)}
+${scope} .ch-bar{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);animation-name:ld-grow,ld-fade;animation-duration:500ms,300ms;animation-delay:calc(var(--i,0)*50ms + 300ms)}
+${reset}</style>`;
+  }
+  if (motion === 'steps') {
+    return `<style>${keyframes}
+${scope} .ld-line{stroke-dasharray:1;stroke-dashoffset:1;animation:ld-draw 700ms ease-out forwards;animation-delay:calc(var(--i,0)*140ms)}
+${scope} .d-node,${scope} .ch-point,${scope} .ch-legend,${scope} .d-edge-labels{opacity:0.15;animation:ld-fade 360ms ease-out forwards;animation-delay:calc(var(--i,0)*140ms + 120ms)}
+${scope} .ch-bar{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);opacity:0.15;animation:ld-grow 420ms ease-out forwards,ld-fade 200ms ease-out forwards;animation-delay:calc(var(--i,0)*120ms),calc(var(--i,0)*120ms)}
+${reset}</style>`;
+  }
+  return `<style>${keyframes}
+${scope} .d-node,${scope} .ch-point,${scope} .ch-bar,${scope} .ch-legend,${scope} .d-edge-labels{opacity:0.15;animation:ld-fade 420ms ease-out forwards;animation-delay:calc(var(--i,0)*70ms)}
+${scope} .ld-line{stroke-dasharray:1;stroke-dashoffset:1;animation:ld-draw 800ms ease-out forwards}
+${reset}</style>`;
+}
+
 function renderFigure(block, ctx) {
   const number = ++ctx.counters.figure;
   const span = block.span || (ctx.theme === 'hud' ? 'column' : 'page');
+  const motion = block.motion || 'none';
   let svg = '';
   try {
     svg = block.spec === 'diagram'
-      ? diagramSvg(block.diagram, ctx.palette, { figure: ctx.style?.figure })
-      : chartSvg(block.chart, ctx.palette, { figure: ctx.style?.figure });
+      ? diagramSvg(block.diagram, ctx.palette, { figure: ctx.style?.figure, motion })
+      : chartSvg(block.chart, ctx.palette, { figure: ctx.style?.figure, motion });
   } catch (error) {
     ctx.warnings.push(`figure ${number}: ${error.message}`);
     svg = `<div class="fig-error">Figure unavailable: ${escapeHtml(error.message)}</div>`;
   }
+  const motionStyle = motionCss(`fig-${number}`, motion);
   return `<figure class="fig${span === 'page' ? ' span-page' : ''}" id="fig-${number}">
+    ${motionStyle}
     <div class="fig-frame">${svg}</div>
     <figcaption><span class="fig-num">Fig. ${number}.</span> ${renderInline(block.caption)}</figcaption>
   </figure>`;

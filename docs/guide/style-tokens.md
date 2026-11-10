@@ -16,10 +16,14 @@ Invalid tokens fail validation at `meta.style`.
 
 ## Motion
 
-Motion is owned by the theme, not the model.
-The console animates its graph, pulse, and clock.
-The paper themes stay static.
-Reduced-motion preferences disable the console animation.
+Motion has two layers.
+
+`figure.motion` animates one generated figure with `draw`, `reveal`, or `steps`.
+It is scoped CSS on the SVG, freezes for print, and disables under `prefers-reduced-motion`.
+The content stays visible while the animation runs.
+
+The console theme also animates its graph, pulse, and clock.
+Those animations are theme owned, not tokens.
 
 ## Example
 

@@ -60,7 +60,7 @@ function iconMarkup(node, palette) {
   }
 }
 
-export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
+export function diagramSvg(spec, palette, { figure = 'outline', motion = 'none' } = {}) {
   const W = spec.width || 1000;
   const H = spec.height || 520;
   const nodes = (spec.nodes || []).map(node => ({ w: 150, h: 56, kind: 'box', icon: 'none', ...node }));
@@ -126,7 +126,8 @@ export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
       }
     }
     const markerEnd = edge.style === 'line' ? '' : ` marker-end="url(#${marker})"`;
-    edges.push(`<path d="${d}" fill="none" stroke="${stroke}" stroke-width="1.1"${dash}${markerEnd}/>`);
+    const animLine = motion !== 'none' && edge.style !== 'dashed' ? ' class="ld-line" pathLength="1"' : '';
+    edges.push(`<path${animLine} d="${d}" fill="none" stroke="${stroke}" stroke-width="1.1"${dash}${markerEnd}/>`);
     if (edge.label) {
       edgeLabels.push(`<text x="${round(labelPoint.x)}" y="${round(labelPoint.y)}" text-anchor="${labelPoint.anchor}" font-size="10.5" fill="${palette.ink}" stroke="${palette.bg}" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${escapeHtml(edge.label)}</text>`);
     }
@@ -135,6 +136,7 @@ export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
 
   // Nodes.
   const nodeMarkup = [];
+  let nodeIndex = 0;
   for (const node of nodes) {
     const minimal = figure === 'minimal';
     const solid = figure === 'solid';
@@ -154,7 +156,7 @@ export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
     const blockHeight = lines.length * lineHeight + (node.sub ? 13 : 0) + iconSpace;
     let textY = node.y + (node.h - blockHeight) / 2 + lineHeight - 4 + iconSpace;
 
-    nodeMarkup.push(`<g class="d-node d-node-${node.kind}">`);
+    nodeMarkup.push(`<g class="d-node d-node-${node.kind}" style="--i:${nodeIndex++}">`);
     if (node.kind === 'stack') {
       nodeMarkup.push(`<rect x="${node.x + 5}" y="${node.y + 5}" width="${node.w}" height="${node.h}" rx="2" fill="${palette.surface}" stroke="${palette.muted}" stroke-opacity="0.5"/>`);
     }
@@ -170,7 +172,7 @@ export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
     nodeMarkup.push('</g>');
   }
   parts.push(`<g class="d-nodes">${nodeMarkup.join('')}</g>`);
-  if (edgeLabels.length) parts.push(`<g class="d-edge-labels">${edgeLabels.join('')}</g>`);
+  if (edgeLabels.length) parts.push(`<g class="d-edge-labels" style="--i:${nodes.length}">${edgeLabels.join('')}</g>`);
 
   if (spec.notes?.length) {
     const notes = spec.notes.map((note, i) =>
@@ -201,7 +203,7 @@ function seriesPoints(series) {
   return (series.values || []).map((value, i) => ({ x: i + 1, y: value, label: series.labels?.[i] }));
 }
 
-export function chartSvg(spec, palette, { figure = 'outline' } = {}) {
+export function chartSvg(spec, palette, { figure = 'outline', motion = 'none' } = {}) {
   const W = spec.width || 1000;
   const H = spec.height || 420;
   const showGrid = figure !== 'minimal';
@@ -257,6 +259,7 @@ export function chartSvg(spec, palette, { figure = 'outline' } = {}) {
   const barWidth = Math.max(4, Math.min(64, (slot * 0.55) / series.length));
 
   const legend = [];
+  let markIndex = 0;
   series.forEach((item, seriesIndex) => {
     const tone = palette[item.tone] || palette.accent;
     const points = seriesPoints(item).sort((a, b) => a.x - b.x);
@@ -267,24 +270,24 @@ export function chartSvg(spec, palette, { figure = 'outline' } = {}) {
         const x = sx(point.x) - (series.length * barWidth) / 2 + seriesIndex * barWidth;
         const y = sy(Math.max(yMin, point.y));
         const height = Math.max(1, margin.t + plotH - y);
-        parts.push(`<rect x="${round(x)}" y="${round(y)}" width="${round(barWidth - 1.5)}" height="${round(height)}" fill="${tone}" fill-opacity="0.9"/>`);
+        parts.push(`<rect class="ch-bar" style="--i:${markIndex++}" x="${round(x)}" y="${round(y)}" width="${round(barWidth - 1.5)}" height="${round(height)}" fill="${tone}" fill-opacity="0.9"/>`);
       });
     } else if (item.kind === 'step' || spec.kind === 'steps') {
       let d = `M ${round(sx(points[0].x))} ${round(sy(points[0].y))}`;
       for (let i = 1; i < points.length; i++) {
         d += ` H ${round(sx(points[i].x))} V ${round(sy(points[i].y))}`;
       }
-      parts.push(`<path d="${d}" fill="none" stroke="${tone}" stroke-width="1.6"/>`);
-      points.forEach(point => parts.push(`<circle cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="2.6" fill="${tone}"/>`));
+      parts.push(`<path${motion !== 'none' ? ' class="ld-line" pathLength="1"' : ''} d="${d}" fill="none" stroke="${tone}" stroke-width="1.6"/>`);
+      points.forEach(point => parts.push(`<circle class="ch-point" style="--i:${markIndex++}" cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="2.6" fill="${tone}"/>`));
     } else if (item.kind === 'dot' || spec.kind === 'scatter') {
-      points.forEach(point => parts.push(`<circle cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="3.2" fill="${tone}"/>`));
+      points.forEach(point => parts.push(`<circle class="ch-point" style="--i:${markIndex++}" cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="3.2" fill="${tone}"/>`));
     } else {
       const path = points.map((point, i) => `${i ? 'L' : 'M'} ${round(sx(point.x))} ${round(sy(point.y))}`).join(' ');
-      parts.push(`<path d="${path}" fill="none" stroke="${tone}" stroke-width="1.5"/>`);
-      points.forEach(point => parts.push(`<circle cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="3.4" fill="${tone}" stroke="${palette.bg}" stroke-width="0.8"/>`));
+      parts.push(`<path${motion !== 'none' ? ' class="ld-line" pathLength="1"' : ''} d="${path}" fill="none" stroke="${tone}" stroke-width="1.5"/>`);
+      points.forEach(point => parts.push(`<circle class="ch-point" style="--i:${markIndex++}" cx="${round(sx(point.x))}" cy="${round(sy(point.y))}" r="3.4" fill="${tone}" stroke="${palette.bg}" stroke-width="0.8"/>`));
     }
 
-    legend.push(`<g><rect x="0" y="-6" width="10" height="7" fill="${tone}"/><text x="15" y="0" font-size="10.5" fill="${palette.ink}">${escapeHtml(item.name)}</text></g>`);
+    legend.push(`<g class="ch-legend" style="--i:${markIndex++}"><rect x="0" y="-6" width="10" height="7" fill="${tone}"/><text x="15" y="0" font-size="10.5" fill="${palette.ink}">${escapeHtml(item.name)}</text></g>`);
   });
 
   for (const note of spec.annotations || []) {

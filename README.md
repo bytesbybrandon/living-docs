@@ -12,6 +12,7 @@ Ships an AXI CLI and a stdio MCP server over the same core.
 
 * **Three themes:** `paper-light` for papers and reports, `paper-dark` for reading notes and essays, `hud` for repo audits and system snapshots.
 * **Generated visuals:** diagrams and charts render as inline SVG from a compact spec, and the console hero uses a seeded graph layout.
+* **Figure motion:** `draw`, `reveal`, and `steps` animate a generated figure with scoped CSS, then freeze for print and reduced motion. See [Document model](docs/guide/document-model.md).
 * **Per-source style tokens:** palette, seed color, type pairing, density, and figure treatment adapt a theme without arbitrary CSS. See [Style tokens](docs/guide/style-tokens.md).
 * **One self-contained file:** inline CSS, inline SVG, no network assets, and print rules. See [Guarantees](docs/guide/guarantees.md).
 * **Engine and interfaces:** the same core powers the CLI and the MCP server.

@@ -33,6 +33,10 @@ Diagrams place nodes and edges on a 1000-unit canvas, with optional groups and n
 Charts accept `line`, `scatter`, `bar`, and `steps` series, with ticks, bounds, legend, and annotations.
 Both render as inline SVG, so no image assets are required.
 
+`motion` is optional and accepts `none`, `draw`, `reveal`, or `steps`.
+Motion is scoped CSS on the generated SVG: edges draw, marks fade in, and bars grow.
+Print and `prefers-reduced-motion` freeze the final frame, and content stays visible while the animation runs.
+
 ## Console blocks
 
 `graphScene` accepts a title, meta chips, tabs, a prompt line, a graph payload, an action strip, and a status line.
