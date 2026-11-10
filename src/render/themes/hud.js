@@ -43,7 +43,7 @@ body{margin:0;background:#020409;color:var(--ink);font-family:var(--mono);font-s
 .scene-head{padding:14px 16px 0}
 .scene-head .brand-row{padding-bottom:6px}
 .scene-top{display:flex;justify-content:space-between;padding:12px 16px 6px;font-size:9px;letter-spacing:.12em;color:#5f8090;text-transform:uppercase}
-.scene-stage{position:relative;aspect-ratio:16/8.6;min-height:300px;margin-top:2px;background:radial-gradient(ellipse at 55% 45%,rgba(30,90,120,.35),rgba(4,8,14,0) 66%),#03060b}
+.scene-stage{position:relative;width:100%;min-width:0;aspect-ratio:16/8.6;min-height:300px;margin-top:2px;background:radial-gradient(ellipse at 55% 45%,rgba(30,90,120,.35),rgba(4,8,14,0) 66%),#03060b}
 .scene-canvas{position:absolute;inset:0;width:100%;height:100%}
 .scene-label{position:absolute;transform:translate(-50%,-50%);font-size:9.5px;letter-spacing:.04em;color:#7fa6b8;white-space:nowrap;text-shadow:0 0 6px #03060b;pointer-events:none}
 .scene-crosshair{position:absolute;transform:translate(-50%,-50%);width:190px;height:190px;border:1px solid rgba(94,200,229,.22);border-radius:50%;pointer-events:none}
@@ -217,7 +217,7 @@ tbody td{padding:5px 6px;color:#b7d4e1;border-bottom:1px solid #0a1822}
   .hud-head{flex-direction:column;gap:8px}
   .live{font-size:8px}
   .scene-stage{min-height:240px}
-  .scene-card{transform:translate(12px,18px);min-width:200px;max-width:230px}
+  .scene-card{left:12px!important;top:auto!important;bottom:10px;transform:none;min-width:0;max-width:none;width:calc(100% - 24px)}
   .scene-label{font-size:8px}
   .sc-tail{margin-left:0}
   .footnotes{column-count:1}
