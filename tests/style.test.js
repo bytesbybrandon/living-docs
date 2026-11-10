@@ -52,7 +52,7 @@ test('style tokens reach the rendered page', () => {
   };
   const result = renderDoc(model, { theme: 'paper-dark' });
   assert.equal(result.ok, true, JSON.stringify(result.errors));
-  assert.match(result.html, /class="theme-paper-dark density-roomy type-technical fig-minimal"/);
+  assert.match(result.html, /class="theme-paper-dark density-roomy type-technical fig-minimal layout-columns"/);
   assert.match(result.html, /--ld-accent:#[0-9a-f]{6}/i);
   assert.match(result.html, /\.columns\{font-size:15\.2px/);
   assert.match(result.html, /font-family:var\(--sans\)/);
@@ -79,4 +79,25 @@ test('invalid seeds fail validation at their path', () => {
   const validation = validateDoc(model);
   assert.equal(validation.ok, false);
   assert.ok(validation.errors.some(error => error.path === 'meta.style.seed' && /hex color/.test(error.message)));
+});
+
+test('single layout collapses paper columns and is ignored by the console', () => {
+  const model = {
+    schemaVersion: 1,
+    meta: { title: 'Layout', style: { layout: 'single' } },
+    blocks: [{ type: 'prose', markdown: 'Body text for the layout check.' }]
+  };
+  const paper = renderDoc(model, { theme: 'paper-light' });
+  assert.equal(paper.ok, true, JSON.stringify(paper.errors));
+  assert.match(paper.html, /layout-single/);
+  assert.match(paper.html, /\.columns\{column-count:1;max-width:880px/);
+
+  const hud = renderDoc(model, { theme: 'hud' });
+  assert.equal(hud.ok, true);
+  assert.match(hud.html, /layout-columns/);
+  assert.doesNotMatch(hud.html, /column-count:1;max-width:880px/);
+
+  const invalid = validateDoc({ ...model, meta: { title: 'x', style: { layout: 'wide' } } });
+  assert.equal(invalid.ok, false);
+  assert.ok(invalid.errors.some(error => error.path === 'meta.style.layout'));
 });

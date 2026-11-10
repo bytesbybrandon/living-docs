@@ -10,6 +10,7 @@ Every choice is curated and validated, so the page stays coherent, printable, an
 | `type` | papers: `classic`, `editorial`, `technical`; console: `mono`, `hybrid`, `terminal` | curated font stacks, no web fonts |
 | `density` | `compact`, `normal`, `roomy` | body size, leading, figure margins, panel height |
 | `figure` | `outline`, `solid`, `minimal` | diagram fill and stroke; `minimal` also drops chart gridlines |
+| `layout` | `columns`, `single` | paper themes only: two columns by default, or one reading column for code and wide tables |
 
 `meta.accent` remains available as a direct accent override.
 Invalid tokens fail validation at `meta.style`.

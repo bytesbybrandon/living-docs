@@ -300,7 +300,8 @@ export const STYLE = {
   seed: str('hex color that derives the accent family, e.g. #2f6f8f', { optional: true }),
   type: oneOf(['classic', 'editorial', 'technical', 'mono', 'hybrid', 'terminal'], 'curated type pairing', { optional: true }),
   density: oneOf(['compact', 'normal', 'roomy'], 'vertical rhythm', { optional: true }),
-  figure: oneOf(['outline', 'solid', 'minimal'], 'diagram and chart treatment', { optional: true })
+  figure: oneOf(['outline', 'solid', 'minimal'], 'diagram and chart treatment', { optional: true }),
+  layout: oneOf(['columns', 'single'], 'paper themes only: two columns (default) or one reading column for code and wide tables', { optional: true })
 };
 
 export const META = {
