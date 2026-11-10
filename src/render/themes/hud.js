@@ -153,13 +153,14 @@ body{margin:0;background:#020409;color:var(--ink);font-family:var(--mono);font-s
 .prose.lead{font-size:14.4px;color:#c8dee9}
 .sec-head{display:flex;gap:10px;align-items:baseline;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#9fc7d8;border-top:1px solid #12242e;padding-top:8px;margin:24px 0 9px;break-after:avoid}
 .sec-num{color:var(--accent)}
-.sub-head{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9fc7d8;margin:16px 0 6px;break-after:avoid}
+.sub-head{display:flex;gap:.6em;align-items:baseline;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9fc7d8;margin:16px 0 6px;break-after:avoid}
 .sec-subtitle{font-family:var(--sans);font-size:11.5px;color:#6f8f9f;margin:-3px 0 8px}
 .fig{margin:16px 0;border:1px solid #12242e;background:#050a12;padding:10px;break-inside:avoid}
 .fig-frame svg,.fig-frame img{display:block;width:100%;height:auto}
 figcaption{font-size:9.5px;line-height:1.5;color:#6f8f9f;margin-top:7px;letter-spacing:.03em}
 .fig-num,.tbl-num{color:var(--accent)}
 .tbl{margin:16px 0;break-inside:avoid}
+.tbl-scroll{max-width:100%;overflow-x:auto}
 .tbl figcaption{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#5f8090;margin:0 0 6px;text-align:right}
 table{width:100%;border-collapse:collapse;font-size:10.5px;line-height:1.5}
 thead th{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#6f8f9f;text-align:left;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px 6px}

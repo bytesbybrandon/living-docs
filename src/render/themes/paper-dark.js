@@ -40,13 +40,14 @@ p.prose{margin:0 0 .72em}
 p.prose.lead::first-letter{float:left;font-size:52px;line-height:.76;padding:6px 8px 0 0;font-weight:700;color:#e5ded0}
 h2.sec-head{display:flex;gap:10px;align-items:baseline;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#b6ada0;border-top:1px solid #4a443c;padding-top:8px;margin:22px 0 9px;break-after:avoid}
 .sec-num{color:#ddd5c6;font-variant-numeric:tabular-nums}
-h3.sub-head{font-size:14px;font-weight:600;margin:15px 0 5px;break-after:avoid}
+h3.sub-head{display:flex;gap:.5em;align-items:baseline;font-size:14px;font-weight:600;margin:15px 0 5px;break-after:avoid}
 .sec-subtitle{font-style:italic;font-size:12.5px;color:#948c7f;margin:-4px 0 8px}
 .fig{margin:16px 0;break-inside:avoid}
 .fig-frame svg,.fig-frame img{display:block;width:100%;height:auto}
 figcaption{font-family:var(--sans);font-size:10.4px;line-height:1.5;color:#a49b8d;margin-top:7px}
 .fig-num,.tbl-num{color:#ddd5c6;font-weight:600}
 .tbl{margin:16px 0;break-inside:avoid}
+.tbl-scroll{max-width:100%;overflow-x:auto}
 .tbl figcaption{font-family:var(--sans);font-size:10.2px;letter-spacing:.08em;text-transform:uppercase;color:#948c7f;text-align:right;margin:0 0 6px}
 table{width:100%;border-collapse:collapse;font-size:11.6px;line-height:1.5}
 thead th{font-family:var(--sans);font-variant:small-caps;letter-spacing:.08em;font-weight:500;color:#bcb3a5;text-align:left;border-top:1px solid #6a6256;border-bottom:1px solid #6a6256;padding:5px 6px}
