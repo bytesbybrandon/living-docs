@@ -14,6 +14,7 @@ The engine is one core with three interfaces.
 | `src/axi/` | command parsing, TOOL-style output, file writes, preview | ingest, render, schema |
 | `src/mcp/` | MCP tool definitions and result shaping | ingest, render, schema |
 | `src/server/preview.js` | local static preview and index | nothing |
+| `scripts/build-site.js`, `site/` | the website: gallery and guide rendered by the engine, plus a hand-written landing page | render, ingest, samples, `docs/guide/` |
 
 Dependency direction is one way: interfaces depend on the core; the core never imports the CLI or MCP layer.
 Theme modules own CSS and document shells but use the shared block renderers, so all themes keep the same escaping and numbering behavior.

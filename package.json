@@ -47,8 +47,9 @@
     "access": "public"
   },
   "scripts": {
-    "test": "node --test tests/cli.test.js tests/ingest.test.js tests/mcp.test.js tests/motion.test.js tests/render.test.js tests/style.test.js tests/validate.test.js",
-    "samples": "node scripts/build-samples.js"
+    "test": "node --test tests/cli.test.js tests/ingest.test.js tests/mcp.test.js tests/motion.test.js tests/render.test.js tests/site.test.js tests/style.test.js tests/validate.test.js",
+    "samples": "node scripts/build-samples.js",
+    "site": "node scripts/build-site.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

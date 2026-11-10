@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseMarkdown, slug, wordCount, plainText } from '../model/markdown.js';
+import { parseMarkdown, slug, wordCount } from '../model/markdown.js';
 import { htmlToMarkdown, htmlTitle } from './html.js';
 import { textToMarkdown } from './text.js';
 
@@ -79,8 +79,8 @@ function normalizeBlocks(blocks) {
       if (block.type === 'table') {
         return {
           type: 'table',
-          columns: block.columns.map(c => plainText(c)),
-          rows: block.rows.map(row => row.map(cell => plainText(cell)))
+          columns: block.columns.map(c => c.trim()),
+          rows: block.rows.map(row => row.map(cell => cell.trim()))
         };
       }
       if (block.type === 'list') {
@@ -200,16 +200,24 @@ export function blockToModelBlock(block) {
 export function draftModel(ingested, { theme = 'paper-dark', includePreamble = true, maxBlocks = 400 } = {}) {
   const { meta, sections, preamble } = ingested;
   const blocks = [];
+  let abstractPending = Boolean(meta.abstract);
+  const takeBlock = block => {
+    if (abstractPending && block.type === 'paragraph' && block.text === meta.abstract) {
+      abstractPending = false;
+      return null;
+    }
+    return blockToModelBlock(block);
+  };
   if (includePreamble && preamble.length) {
     for (const block of preamble) {
-      const mapped = blockToModelBlock(block);
+      const mapped = takeBlock(block);
       if (mapped) blocks.push(mapped);
     }
   }
   for (const section of sections) {
     blocks.push({ type: 'heading', title: section.title, level: 2 });
     for (const block of section.blocks) {
-      const mapped = blockToModelBlock(block);
+      const mapped = takeBlock(block);
       if (mapped) blocks.push(mapped);
       if (blocks.length >= maxBlocks) break;
     }

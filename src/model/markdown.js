@@ -56,7 +56,8 @@ const olRe = /^\s*\d+[.)]\s+(.*)$/;
 const hrRe = /^\s*([-*_])(?:\s*\1){2,}\s*$/;
 
 function splitRow(line) {
-  return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+  const body = line.trim().replace(/^\|/, '').replace(/(?<!\\)\|$/, '');
+  return body.split(/(?<!\\)\|/).map(cell => cell.trim().replace(/\\\|/g, '|'));
 }
 
 /**

@@ -24,3 +24,4 @@ docs/*.json
 .env.*
 !.env.example
 Thumbs.db
+site/dist/

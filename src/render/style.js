@@ -173,13 +173,15 @@ export function resolveStyle(theme, basePalette, style = {}, accentOverride) {
 
   const density = DENSITIES.has(style.density) ? style.density : 'normal';
   const figure = FIGURES.has(style.figure) ? style.figure : 'outline';
+  const layout = !isConsole && style.layout === 'single' ? 'single' : 'columns';
 
   return {
     palette,
     type,
     density,
     figure,
-    className: `density-${density} type-${type} fig-${figure}`
+    layout,
+    className: `density-${density} type-${type} fig-${figure} layout-${layout}`
   };
 }
 
@@ -287,5 +289,8 @@ export function styleCss(theme, palette, resolved) {
   const overrides = theme === 'hud' ? CONSOLE_OVERRIDES : PAPER_OVERRIDES;
   const density = DENSITY[theme]?.[resolved.density] || '';
   const type = TYPE[theme]?.[resolved.type] || '';
-  return `${palettes(palette)}${overrides}${density}${type}`;
+  const layout = resolved.layout === 'single'
+    ? '.columns{column-count:1;max-width:880px;margin-left:auto;margin-right:auto}.span-page{column-span:none}.footnotes{column-count:1}'
+    : '';
+  return `${palettes(palette)}${overrides}${density}${type}${layout}`;
 }

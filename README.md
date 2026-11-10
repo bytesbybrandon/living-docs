@@ -96,6 +96,7 @@ Detailed references:
 * [Guarantees](docs/guide/guarantees.md)
 * [Architecture](ARCHITECTURE.md)
 * [Decisions](docs/decisions/0001-one-model-three-themes.md)
+* [Website](https://bytesbybrandon.github.io/living-docs/), built from this repository with `npm run site`
 
 ---
 
@@ -122,7 +123,8 @@ living-docs/
     render/            block renderers, SVG generators, style resolution, themes
     server/            local preview server
   samples/             sample models and one Markdown source
-  scripts/             sample build script
+  scripts/             sample and website build scripts
+  site/                landing page template and stylesheet for the website
   tests/               Node test runner suites
   docs/
     decisions/         architecture decision records

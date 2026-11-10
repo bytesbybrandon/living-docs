@@ -114,3 +114,29 @@ test('reads utf-8 files with a BOM', async () => {
   assert.equal(ingested.meta.title, 'BOM Title');
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('keeps escaped pipes and inline markup inside table cells', async () => {
+  const ingested = await ingestSource({
+    text: ['# Doc', '', '## Flags', '', '| Flag | Purpose |', '| --- | --- |', '| `--section <n\\|id>` | pick **one** |', ''].join('\n'),
+    kind: 'markdown'
+  });
+  const table = ingested.sections[0].blocks.find(block => block.type === 'table');
+  assert.deepEqual(table.columns, ['Flag', 'Purpose']);
+  assert.deepEqual(table.rows, [['`--section <n|id>`', 'pick **one**']]);
+
+  const model = draftModel(ingested);
+  const result = renderDoc(model, { theme: 'paper-light' });
+  assert.equal(result.ok, true);
+  assert.match(result.html, /<code>--section &lt;n\|id&gt;<\/code>/);
+  assert.match(result.html, /<strong>one<\/strong>/);
+});
+
+test('draft model does not repeat the abstract as the first paragraph', async () => {
+  const intro = 'This opening paragraph is long enough to be treated as the abstract of the document by the outline step, so it must not be printed twice.';
+  const ingested = await ingestSource({ text: ['# Doc', '', intro, '', '## Part', '', 'Body of the part.'].join('\n'), kind: 'markdown' });
+  assert.equal(ingested.meta.abstract, intro);
+  const model = draftModel(ingested);
+  const prose = model.blocks.filter(block => block.type === 'prose').map(block => block.markdown);
+  assert.deepEqual(prose, ['Body of the part.']);
+  assert.equal(model.meta.abstract, intro);
+});
