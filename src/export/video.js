@@ -32,7 +32,7 @@ async function loadChromium() {
   } catch {
     throw new ExportError('video export needs the optional playwright package', {
       code: 'missing-playwright',
-      hint: 'npm i -D playwright && npx playwright install chromium'
+      hint: 'install playwright beside living-docs (npm i -D playwright, or npx -p @bytesbybrandon/living-docs -p playwright living-docs-axi ...), then npx playwright install chromium'
     });
   }
 }

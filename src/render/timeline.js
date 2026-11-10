@@ -115,13 +115,18 @@ const RUNTIME = `
     });
   }
 
-  function applyCues(t){
+  var ONCE = { reveal: 1, count: 1, type: 1 };
+  // settled: a looping live page keeps reveals, counts, and typing at their end state after the first pass.
+  // shift(item): live-only delay for a block that was still below the fold when its cue came up.
+  function applyCues(t0, settled, shift){
     var i, el;
     for (i = 0; i < managed.length; i++) managed[i].__ld = {};
     for (i = 0; i < items.length; i++) {
       var cue = items[i].cue, at = cue.at, dur = cue.dur;
       el = items[i].el;
-      var p = clamp((t - at) / dur);
+      var t = shift ? t0 - shift(items[i]) : t0;
+      var ct = settled && ONCE[cue.do] ? Infinity : t;
+      var p = clamp((ct - at) / dur);
       if (cue.do === 'highlight') {
         put(el, 'hl', ease((t - at) / Math.min(.9, dur * .6)));
         put(el, 'ha', t < at ? 0 : clamp((at + dur - t) / .45));
@@ -131,7 +136,7 @@ const RUNTIME = `
         put(el, 'f', env);
         if (el.hasAttribute('data-part')) Array.prototype.forEach.call(siblingsOf(el), function(part){ put(part, 'dim', env); });
       } else if (cue.do === 'reveal') {
-        put(el, 'r', ease((t - at) / Math.min(dur, .9)));
+        put(el, 'r', ease((ct - at) / Math.min(dur, .9)));
       } else if (cue.do === 'count') {
         put(el, 'count', ease(p));
       } else if (cue.do === 'type') {
@@ -153,13 +158,14 @@ const RUNTIME = `
       }
       el.classList.toggle('ld-typing', state.type != null && state.type > 0 && state.type < 1);
     }
-    scenes.forEach(function(scene){ moveScene(scene, t); });
-    if (cam) moveCamera(t);
+    scenes.forEach(function(scene){ moveScene(scene, t0, shift); });
+    if (cam) moveCamera(t0);
   }
 
-  function moveScene(scene, t){
+  function moveScene(scene, t0, shift){
     var pos = { x: scene.__ldHome.x, y: scene.__ldHome.y }, text = scene.__ldText, away = 0, current = null;
     scene.__ldMoves.forEach(function(move){
+      var t = shift ? t0 - shift(move) : t0;
       if (t < move.cue.at) return;
       var p = ease((t - move.cue.at) / move.cue.dur);
       var to = { x: parseFloat(move.el.style.left), y: parseFloat(move.el.style.top) };
@@ -204,12 +210,14 @@ const RUNTIME = `
   }
 
   // Ambient motion (theme canvases, CSS figure motion) runs on the same clock.
-  function applyAmbient(t){
+  function applyAmbient(t, live){
     var hooks = window.__ldHooks || [];
     for (var i = 0; i < hooks.length; i++) hooks[i](t * 1000);
     if (!document.getAnimations) return;
     var list = document.getAnimations();
     for (var j = 0; j < list.length; j++) {
+      // Live pages leave hover and focus transitions to the browser.
+      if (live && window.CSSTransition && list[j] instanceof CSSTransition) continue;
       var target = list[j].effect && list[j].effect.target;
       var owner = target && target.closest ? target.closest('.ld-rv') : null;
       var offset = owner && owner.__ldAt != null ? owner.__ldAt : 0;
@@ -225,13 +233,36 @@ const RUNTIME = `
   if (window.__ldCapture) { seek(0); return; }
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) { seek(duration); return; }
-  var start = null;
+  // Live playback waits for the reader: a block whose cue comes up while it is still below the fold
+  // defers its own cues, in order, until it scrolls into view. Everything else keeps playing.
+  var gates = items.slice();
+  scenes.forEach(function(scene){ gates = gates.concat(scene.__ldMoves); });
+  gates.forEach(function(g){ g.root = g.el.closest('[data-cue]') || g.el; g.root.__ldDelay = 0; });
+  function shift(g){ return g.root.__ldDelay; }
+  function belowFold(el){ return el.getBoundingClientRect().top > window.innerHeight; }
+  var last = null, wall = 0, cueT = 0, cycle = 0;
   function frame(now){
-    if (start === null) start = now;
-    var t = (now - start) / 1000;
-    applyCues(data.loop ? t % duration : Math.min(t, duration));
-    applyAmbient(data.loop ? t % duration : t);
-    if (data.loop || t < duration || (window.__ldHooks || []).length) requestAnimationFrame(frame);
+    var dt = last === null ? 0 : Math.min(.1, (now - last) / 1000);
+    last = now;
+    wall += dt;
+    var waiting = [], maxDelay = 0;
+    cueT += dt;
+    gates.forEach(function(g){
+      var local = cueT - g.root.__ldDelay;
+      if (local >= g.cue.at && local < g.cue.at + g.cue.dur && waiting.indexOf(g.root) < 0 && belowFold(g.root)) {
+        waiting.push(g.root);
+        g.root.__ldDelay = cueT - g.cue.at; // hold exactly at the cue start
+      }
+    });
+    gates.forEach(function(g){ maxDelay = Math.max(maxDelay, g.root.__ldDelay); });
+    if (data.loop && cueT >= duration + maxDelay) {
+      cueT -= duration + maxDelay;
+      cycle++;
+      gates.forEach(function(g){ g.root.__ldDelay = 0; });
+    }
+    applyCues(Math.min(cueT, duration + maxDelay), cycle > 0, shift);
+    applyAmbient(wall, true);
+    if (data.loop || cueT < duration + maxDelay || (window.__ldHooks || []).length) requestAnimationFrame(frame);
   }
   seek(0);
   requestAnimationFrame(frame);

@@ -13,7 +13,7 @@ Decision 0001 kept motion theme owned and the paper themes static.
 Add an optional `timeline` to the model.
 Cues target real anchors: sentence marks (`[[mark:id|text]]`), block ids, and parts inside a block.
 One inlined runtime applies every cue as a pure function of time, and the same runtime drives theme canvases and CSS figure motion through one clock.
-The live page plays the timeline; video export renders a fixed stage, seeks each frame in headless Chromium, and encodes with ffmpeg.
+The live page plays the timeline and defers a block's cues until the block scrolls into view; video export renders a fixed stage, seeks each frame in headless Chromium, and encodes with ffmpeg.
 The draft path writes cues from the source so new docs move without hand authoring.
 
 Paper themes may now animate, but only when a doc carries a timeline.

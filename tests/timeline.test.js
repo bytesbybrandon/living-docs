@@ -166,6 +166,26 @@ test('seek(t) is a pure function of t in the browser', { skip: !chromiumReady &&
   }
 });
 
+test('the live page holds a cue until its target scrolls into view', { skip: !chromiumReady && 'playwright chromium not installed' }, async () => {
+  const model = base();
+  model.blocks.splice(2, 0, ...Array.from({ length: 30 }, (_, i) => ({ type: 'prose', markdown: `Filler paragraph ${i} keeps the figure well below the fold on a phone.` })));
+  model.timeline.cues = [{ at: 0.2, dur: 3, do: 'focus', target: 'loop/b' }];
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.setContent(renderDoc(model).html);
+    const focus = () => page.evaluate(() => Number(document.querySelector('[data-cue="loop"] [data-part="b"]').style.getPropertyValue('--ld-f') || 0));
+    await page.waitForTimeout(900);
+    assert.equal(await focus(), 0);
+    await page.evaluate(() => document.querySelector('[data-cue="loop"]').scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(900);
+    assert.ok(await focus() > 0.5);
+  } finally {
+    await browser.close();
+  }
+});
+
 test('captured frames match across runs and follow fps x duration', { skip: !chromiumReady && 'playwright chromium not installed' }, async () => {
   const html = renderDoc(base(), { stage: true }).html;
   const run = async () => {

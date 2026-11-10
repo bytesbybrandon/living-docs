@@ -34,7 +34,8 @@ A part is a diagram node id, a panel index such as `08`, or a scene label.
 Validation rejects a cue whose target does not exist.
 
 `timeline.duration` defaults to the last cue end plus 1.5 seconds.
-`timeline.loop` restarts the live page when it ends.
+`timeline.loop` restarts the live page when it ends; reveals, counts, and typing stay settled after the first pass.
+On the live page, a block whose cue comes up while it is still below the fold waits, with its cues in order, until the reader scrolls to it.
 
 ## Drafted cues
 
@@ -52,7 +53,13 @@ living-docs-axi render docs/notes.model.json --format gif --size 1080x1350 --fps
 The renderer lays the doc out on a fixed stage, seeks the timeline frame by frame in headless Chromium, and pipes the frames to ffmpeg.
 Every frame is a pure function of time, so two renders on one machine produce the same frames.
 MP4 is the default for sharing; GIF is 720 wide at 15 fps for READMEs.
-Video needs the optional `playwright` package with Chromium (`npm i -D playwright && npx playwright install chromium`) and `ffmpeg` on `PATH` or in `LIVING_DOCS_FFMPEG`.
+Video needs the optional `playwright` package with Chromium, and `ffmpeg` on `PATH` or in `LIVING_DOCS_FFMPEG`.
+In a project, run `npm i -D playwright`; with npx, add it to the same call:
+
+```bash
+npx -y -p @bytesbybrandon/living-docs -p playwright living-docs-axi render notes.model.json --format mp4
+npx playwright install chromium
+```
 
 ## Accessibility and print
 
