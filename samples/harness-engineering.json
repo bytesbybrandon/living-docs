@@ -3,6 +3,7 @@
   "theme": "paper-light",
   "meta": {
     "title": "Harness Engineering: Anatomy, Architecture, and Evolution of Coding Agents",
+    "style": { "palette": "ink", "type": "classic", "density": "normal", "figure": "outline" },
     "subtitle": "A source-code study of eleven systems",
     "author": "Paul Barbaste, Tristan Darrigol, Germain Vu, and Tom Wiltberger",
     "affiliation": "Inclusive Brains · Wavestone AI Lab",

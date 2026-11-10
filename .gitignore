@@ -2,3 +2,5 @@ node_modules/
 docs/
 *.log
 .DS_Store
+.docs/
+.reactive/

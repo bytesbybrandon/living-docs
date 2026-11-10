@@ -60,7 +60,7 @@ function iconMarkup(node, palette) {
   }
 }
 
-export function diagramSvg(spec, palette) {
+export function diagramSvg(spec, palette, { figure = 'outline' } = {}) {
   const W = spec.width || 1000;
   const H = spec.height || 520;
   const nodes = (spec.nodes || []).map(node => ({ w: 150, h: 56, kind: 'box', icon: 'none', ...node }));
@@ -91,8 +91,9 @@ export function diagramSvg(spec, palette) {
   }
   parts.push(`<g class="d-groups">${groups.join('')}</g>`);
 
-  // Edges, trimmed to node boundaries.
+  // Edges, trimmed to node boundaries; labels render above nodes.
   const edges = [];
+  const edgeLabels = [];
   for (const edge of spec.edges || []) {
     const from = byId.get(edge.from);
     const to = byId.get(edge.to);
@@ -107,18 +108,27 @@ export function diagramSvg(spec, palette) {
     const dash = edge.style === 'dashed' ? ' stroke-dasharray="5 4"' : '';
     let d;
     let labelPoint;
+    const horizontal = Math.abs(end.x - start.x) >= Math.abs(end.y - start.y);
+    const gap = Math.abs(end.x - start.x);
     if (edge.route === 'elbow' || (edge.style === 'dashed' && Math.abs(toCenter.y - fromCenter.y) > 40)) {
       const midX = round((start.x + end.x) / 2);
       d = `M ${round(start.x)} ${round(start.y)} H ${midX} V ${round(end.y)} H ${round(end.x)}`;
-      labelPoint = { x: midX, y: (start.y + end.y) / 2 };
+      labelPoint = { x: midX, y: (start.y + end.y) / 2, anchor: 'middle' };
     } else {
       d = `M ${round(start.x)} ${round(start.y)} L ${round(end.x)} ${round(end.y)}`;
-      labelPoint = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+      labelPoint = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2, anchor: 'middle' };
+      if (horizontal && gap < 170) {
+        labelPoint.y = Math.min(start.y, end.y) - 12;
+      } else if (horizontal) {
+        labelPoint.y -= 7;
+      } else {
+        labelPoint = { x: (start.x + end.x) / 2 + 9, y: (start.y + end.y) / 2 + 3, anchor: 'start' };
+      }
     }
     const markerEnd = edge.style === 'line' ? '' : ` marker-end="url(#${marker})"`;
     edges.push(`<path d="${d}" fill="none" stroke="${stroke}" stroke-width="1.1"${dash}${markerEnd}/>`);
     if (edge.label) {
-      edges.push(`<text x="${round(labelPoint.x)}" y="${round(labelPoint.y - 6)}" text-anchor="middle" font-size="10.5" fill="${palette.ink}" stroke="${palette.bg}" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${escapeHtml(edge.label)}</text>`);
+      edgeLabels.push(`<text x="${round(labelPoint.x)}" y="${round(labelPoint.y)}" text-anchor="${labelPoint.anchor}" font-size="10.5" fill="${palette.ink}" stroke="${palette.bg}" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${escapeHtml(edge.label)}</text>`);
     }
   }
   parts.push(`<g class="d-edges">${edges.join('')}</g>`);
@@ -126,11 +136,16 @@ export function diagramSvg(spec, palette) {
   // Nodes.
   const nodeMarkup = [];
   for (const node of nodes) {
-    const fill = node.kind === 'accent' ? palette.accentSoft
+    const minimal = figure === 'minimal';
+    const solid = figure === 'solid';
+    const fill = node.kind === 'accent' ? (minimal ? 'none' : palette.accentSoft)
       : node.kind === 'plain' ? 'none'
       : node.kind === 'dashed' ? 'none'
+      : minimal ? 'none'
+      : solid ? palette.box
       : palette.surface;
-    const stroke = node.kind === 'accent' ? palette.accent : palette.ink;
+    const stroke = node.kind === 'accent' ? palette.accent : (minimal ? palette.hair : palette.ink);
+    const strokeWidth = node.kind === 'accent' ? 1.5 : minimal ? 0.8 : solid ? 1.3 : 1;
     const dash = node.kind === 'dashed' ? ' stroke-dasharray="5 4"' : '';
     const opacity = node.kind === 'dashed' ? ' stroke-opacity="0.75"' : '';
     const iconSpace = node.icon && node.icon !== 'none' ? 14 : 0;
@@ -143,7 +158,7 @@ export function diagramSvg(spec, palette) {
     if (node.kind === 'stack') {
       nodeMarkup.push(`<rect x="${node.x + 5}" y="${node.y + 5}" width="${node.w}" height="${node.h}" rx="2" fill="${palette.surface}" stroke="${palette.muted}" stroke-opacity="0.5"/>`);
     }
-    nodeMarkup.push(`<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="${node.kind === 'accent' ? 1.5 : 1}"${dash}${opacity}/>`);
+    nodeMarkup.push(`<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash}${opacity}/>`);
     nodeMarkup.push(iconMarkup(node, palette));
     for (const line of lines) {
       nodeMarkup.push(`<text x="${round(node.x + node.w / 2)}" y="${round(textY)}" text-anchor="middle" font-size="13" fill="${palette.ink}" font-weight="${node.kind === 'accent' ? 600 : 400}">${escapeHtml(line)}</text>`);
@@ -155,6 +170,7 @@ export function diagramSvg(spec, palette) {
     nodeMarkup.push('</g>');
   }
   parts.push(`<g class="d-nodes">${nodeMarkup.join('')}</g>`);
+  if (edgeLabels.length) parts.push(`<g class="d-edge-labels">${edgeLabels.join('')}</g>`);
 
   if (spec.notes?.length) {
     const notes = spec.notes.map((note, i) =>
@@ -185,9 +201,10 @@ function seriesPoints(series) {
   return (series.values || []).map((value, i) => ({ x: i + 1, y: value, label: series.labels?.[i] }));
 }
 
-export function chartSvg(spec, palette) {
+export function chartSvg(spec, palette, { figure = 'outline' } = {}) {
   const W = spec.width || 1000;
   const H = spec.height || 420;
+  const showGrid = figure !== 'minimal';
   const margin = { l: 74, r: 28, t: 26, b: 56 };
   const plotW = W - margin.l - margin.r;
   const plotH = H - margin.t - margin.b;
@@ -223,7 +240,7 @@ export function chartSvg(spec, palette) {
 
   for (const tick of yTicks) {
     const y = round(sy(tick));
-    parts.push(`<line x1="${margin.l}" y1="${y}" x2="${W - margin.r}" y2="${y}" stroke="${palette.hair}" stroke-width="1"/>`);
+    if (showGrid) parts.push(`<line x1="${margin.l}" y1="${y}" x2="${W - margin.r}" y2="${y}" stroke="${palette.hair}" stroke-width="1"/>`);
     parts.push(`<text x="${margin.l - 10}" y="${y + 3.5}" text-anchor="end" font-size="10.5" fill="${palette.muted}">${escapeHtml(formatNumber(tick))}</text>`);
   }
   for (const tick of xTicks) {

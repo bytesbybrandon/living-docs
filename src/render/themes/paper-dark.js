@@ -1,4 +1,5 @@
 import { escapeHtml, renderInline } from '../html.js';
+import { styleCss } from '../style.js';
 
 export const palette = {
   bg: '#0a0908',
@@ -220,7 +221,7 @@ function abstractBlock(model) {
   return `<section class="abstract"><p><span class="run-in">Abstract.</span> ${renderInline(meta.abstract)}</p>${terms}</section>`;
 }
 
-export function document({ model, blocksHtml }) {
+export function document({ model, blocksHtml, palette, style }) {
   const meta = model.meta;
   const foot = `<footer class="doc-foot">
     <span>${escapeHtml(meta.title)}</span>
@@ -236,8 +237,9 @@ export function document({ model, blocksHtml }) {
 <meta name="color-scheme" content="dark">
 <title>${escapeHtml(meta.title)}</title>
 <style>${CSS}</style>
+<style>${styleCss('paper-dark', palette, style)}</style>
 </head>
-<body class="theme-paper-dark">
+<body class="theme-paper-dark ${style.className}">
 <div class="sheet">
   ${runhead(model)}
   ${masthead(model)}

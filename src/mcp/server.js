@@ -6,7 +6,7 @@ import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprot
 import { ingestSource, outlineOf, selectSection, draftModel } from '../ingest/index.js';
 import { renderDoc, themeList } from '../render/index.js';
 import { validateDoc, formatErrors } from '../model/validate.js';
-import { BLOCKS, THEMES, blockFieldSummary } from '../model/schema.js';
+import { BLOCKS, THEMES, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
 
 const quoteCell = value => {
@@ -100,6 +100,14 @@ async function handle(name, args = {}) {
       return textResult(toon('themes', ['name', 'summary', 'best'], themeList().map(theme => [theme.name, theme.summary, theme.best])));
     }
     case 'living_docs_schema': {
+      if (args.block === 'style') {
+        return textResult(toon('style', ['name', 'kind', 'required', 'desc'], Object.entries(STYLE).map(([name, spec]) => [
+          name,
+          spec.values ? `enum(${spec.values.join('|')})` : spec.kind,
+          spec.optional ? 'no' : 'yes',
+          spec.desc
+        ])));
+      }
       if (args.block) {
         const summary = blockFieldSummary(args.block);
         if (!summary) return toolError(`unknown block "${args.block}" (one of: ${Object.keys(BLOCKS).join(', ')})`);

@@ -9,13 +9,6 @@ const MIME = {
   '.gif': 'image/gif', '.svg': 'image/svg+xml', '.avif': 'image/avif'
 };
 
-export function attrs(map) {
-  return Object.entries(map)
-    .filter(([, value]) => value !== null && value !== undefined && value !== false)
-    .map(([key, value]) => (value === true ? ` ${key}` : ` ${key}="${escapeAttr(value)}"`))
-    .join('');
-}
-
 export function inlineImage(src, baseDir) {
   const resolved = path.resolve(baseDir || process.cwd(), src);
   if (!fs.existsSync(resolved)) throw new Error(`Image not found: ${resolved}`);

@@ -89,6 +89,32 @@ Block types:
 Figures accept either a `diagram` spec (nodes, edges, groups on a 1000-unit canvas) or a `chart` spec (`line`, `scatter`, `bar`, `steps` with series and annotations).
 The renderer generates SVG; no image assets are required.
 
+## Per-source style tokens
+
+`meta.style` adapts a theme to its source without accepting arbitrary CSS.
+Every choice is curated and validated, so the page stays coherent, printable, and deterministic.
+
+| Token | Values | Effect |
+| --- | --- | --- |
+| `palette` | `default`, `ember`, `ocean`, `moss`, `graphite`, `ink`, `plum` | curated accent family |
+| `seed` | hex color, e.g. `#2f6f8f` | derives the accent, tinted surfaces, and figure fills; lightness is corrected until the accent clears WCAG contrast against the page |
+| `type` | papers: `classic`, `editorial`, `technical`; console: `mono`, `hybrid`, `terminal` | curated font stacks, no web fonts |
+| `density` | `compact`, `normal`, `roomy` | body size, leading, figure margins, panel height |
+| `figure` | `outline`, `solid`, `minimal` | diagram fill and stroke; `minimal` also drops chart gridlines |
+
+`meta.accent` remains available as a direct accent override.
+Motion is owned by the theme, not the model: the console animates its graph, pulse, and clock; the paper themes stay static.
+Reduced-motion preferences disable the console animation.
+
+```json
+{
+  "meta": {
+    "title": "Example",
+    "style": { "seed": "#2f6f8f", "type": "editorial", "density": "roomy", "figure": "minimal" }
+  }
+}
+```
+
 ## MCP server
 
 ```json
@@ -113,7 +139,8 @@ It calls this CLI; it does not reimplement rendering.
 ## Guarantees
 
 - One file per doc: CSS, SVG, and runtime script inlined; no CDN, fonts, or remote images.
-- Deterministic output: identical model and theme produce identical bytes, including generated SVG ids and graph layout.
+- Deterministic output: identical model and theme produce identical bytes, including generated SVG ids, graph layout, and derived palette values.
+- Curated styling: `meta.style` only accepts known palettes, type pairings, densities, and figure treatments; accent colors are contrast-corrected, and no arbitrary CSS is injected.
 - Escaped content: document text is HTML-escaped; only `http(s)`, `mailto:`, `#`, and relative URLs survive as links.
 - Print ready: paper themes ship `@page` rules and keep figures, tables, algorithms, and callouts unbroken.
 

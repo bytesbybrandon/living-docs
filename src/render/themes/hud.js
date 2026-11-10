@@ -1,4 +1,5 @@
-import { escapeHtml, renderInline } from '../html.js';
+import { escapeHtml } from '../html.js';
+import { styleCss } from '../style.js';
 
 export const palette = {
   bg: '#04070d',
@@ -355,7 +356,7 @@ const RUNTIME = `
 })();
 `;
 
-export function document({ model, blocksHtml }) {
+export function document({ model, blocksHtml, palette, style }) {
   const meta = model.meta;
   const hasScene = model.blocks.some(block => block.type === 'graphScene');
   return `<!doctype html>
@@ -367,8 +368,9 @@ export function document({ model, blocksHtml }) {
 <meta name="color-scheme" content="dark">
 <title>${escapeHtml(meta.title)}</title>
 <style>${CSS}</style>
+<style>${styleCss('hud', palette, style)}</style>
 </head>
-<body class="theme-hud">
+<body class="theme-hud ${style.className}">
 <div class="hud">
   ${hasScene ? '' : head(model)}
   <main>

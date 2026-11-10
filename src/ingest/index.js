@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseMarkdown, slug, wordCount, plainText } from '../model/markdown.js';
-import { htmlToMarkdown, htmlTitle, decodeEntities } from './html.js';
+import { htmlToMarkdown, htmlTitle } from './html.js';
 import { textToMarkdown } from './text.js';
 
 export class IngestError extends Error {
@@ -327,5 +327,3 @@ export function selectSection(ingested, selector) {
   }
   return ingested.sections.find(section => section.id === selector) || null;
 }
-
-export { plainText, decodeEntities };

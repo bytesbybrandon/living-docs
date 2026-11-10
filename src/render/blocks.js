@@ -1,4 +1,4 @@
-import { escapeHtml, renderInline, inlineImage, attrs } from './html.js';
+import { escapeHtml, renderInline, inlineImage } from './html.js';
 import { diagramSvg, chartSvg, sparklineSvg, radarSvg, formatNumber } from './svg.js';
 import { graphPayload } from './graph.js';
 import { wordCount } from '../model/markdown.js';
@@ -23,8 +23,8 @@ function renderFigure(block, ctx) {
   let svg = '';
   try {
     svg = block.spec === 'diagram'
-      ? diagramSvg(block.diagram, ctx.palette)
-      : chartSvg(block.chart, ctx.palette);
+      ? diagramSvg(block.diagram, ctx.palette, { figure: ctx.style?.figure })
+      : chartSvg(block.chart, ctx.palette, { figure: ctx.style?.figure });
   } catch (error) {
     ctx.warnings.push(`figure ${number}: ${error.message}`);
     svg = `<div class="fig-error">Figure unavailable: ${escapeHtml(error.message)}</div>`;
@@ -341,5 +341,3 @@ export function documentStats(model, html) {
     panels: model.blocks.filter(block => block.type === 'panels').reduce((sum, block) => sum + block.items.length, 0)
   };
 }
-
-export { renderPanelBody, renderGraphSceneFallback, attrs };

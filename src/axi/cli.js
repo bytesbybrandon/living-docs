@@ -3,10 +3,10 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { ingestSource, outlineOf, draftModel, selectSection, blockToModelBlock } from '../ingest/index.js';
+import { ingestSource, outlineOf, draftModel, selectSection } from '../ingest/index.js';
 import { renderDoc, themeList } from '../render/index.js';
 import { validateDoc, formatErrors } from '../model/validate.js';
-import { BLOCKS, THEMES, META, blockFieldSummary } from '../model/schema.js';
+import { BLOCKS, THEMES, META, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
 
 const HOME = os.homedir();
@@ -103,6 +103,14 @@ function themes() {
 }
 
 function schema(flags) {
+  if (flags.block === 'style') {
+    return toon('style', ['name', 'kind', 'required', 'desc'], Object.entries(STYLE).map(([name, spec]) => [
+      name,
+      spec.values ? `enum(${spec.values.join('|')})` : spec.kind,
+      spec.optional ? 'no' : 'yes',
+      spec.desc
+    ])) + helpLines(['Run `living-docs-axi schema --block figure`']);
+  }
   if (flags.block) {
     const summary = blockFieldSummary(flags.block);
     if (!summary) throw new UsageError(`unknown block "${flags.block}" (one of: ${Object.keys(BLOCKS).join(', ')})`);
@@ -396,4 +404,4 @@ export async function main(argv) {
   }
 }
 
-export { runRender, slugify, plainBlockText, blockToModelBlock };
+export { runRender, slugify, plainBlockText };

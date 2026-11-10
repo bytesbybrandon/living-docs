@@ -3,6 +3,7 @@
   "theme": "hud",
   "meta": {
     "title": "AI CONFIGS / OPEN SOURCE",
+    "style": { "palette": "ocean", "type": "mono", "density": "normal", "figure": "solid" },
     "kicker": "SRC GITHUB · 5 TEAMS · 5 REPOS · 548.4K STARS · $0",
     "runningHead": "AI configs · open source audit",
     "date": "2026-11-10",

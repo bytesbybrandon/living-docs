@@ -1,4 +1,5 @@
-import { escapeHtml, renderInline, attrs } from '../html.js';
+import { escapeHtml, renderInline } from '../html.js';
+import { styleCss } from '../style.js';
 
 export const palette = {
   bg: '#ffffff',
@@ -217,7 +218,7 @@ function abstractBlock(model) {
   </section>`;
 }
 
-export function document({ model, ctx, blocksHtml }) {
+export function document({ model, ctx, blocksHtml, palette, style }) {
   const meta = model.meta;
   const stamp = (meta.stamps || []).length
     ? `<div class="margin-stamp">${escapeHtml(meta.stamps.join('   '))}</div>`
@@ -235,8 +236,9 @@ export function document({ model, ctx, blocksHtml }) {
 <meta name="generator" content="living-docs">
 <title>${escapeHtml(meta.title)}</title>
 <style>${CSS}</style>
+<style>${styleCss('paper-light', palette, style)}</style>
 </head>
-<body class="theme-paper-light">
+<body class="theme-paper-light ${style.className}">
 <div class="sheet">
   ${stamp}
   ${masthead(model)}

@@ -1,6 +1,7 @@
 import { validateDoc } from '../model/validate.js';
 import { createContext, renderBlocks, documentStats } from './blocks.js';
 import { THEMES as THEME_INFO } from '../model/schema.js';
+import { resolveStyle } from './style.js';
 import * as paperLight from './themes/paper-light.js';
 import * as paperDark from './themes/paper-dark.js';
 import * as hud from './themes/hud.js';
@@ -44,10 +45,12 @@ export function renderDoc(model, { theme, baseDir, accent } = {}) {
     return { ok: false, theme: chosen, errors: validation.errors, warnings: [] };
   }
 
-  const palette = { ...themeModule.palette, ...(accent || model.meta.accent ? { accent: accent || model.meta.accent } : {}) };
+  const styled = resolveStyle(chosen, themeModule.palette, model.meta.style || {}, accent || model.meta.accent);
+  const palette = styled.palette;
   const ctx = createContext({ theme: chosen, palette, baseDir, model });
+  ctx.style = styled;
   const blocksHtml = renderBlocks(model.blocks, ctx);
-  const html = themeModule.document({ model, ctx, palette, blocksHtml });
+  const html = themeModule.document({ model, ctx, palette, blocksHtml, style: styled });
   const stats = documentStats(model, html);
 
   return {

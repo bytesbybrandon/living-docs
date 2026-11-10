@@ -294,6 +294,14 @@ export const BLOCKS = {
   }
 };
 
+export const STYLE = {
+  palette: oneOf(['default', 'ember', 'ocean', 'moss', 'graphite', 'ink', 'plum'], 'curated accent family', { optional: true }),
+  seed: str('hex color that derives the accent family, e.g. #2f6f8f', { optional: true }),
+  type: oneOf(['classic', 'editorial', 'technical', 'mono', 'hybrid', 'terminal'], 'curated type pairing', { optional: true }),
+  density: oneOf(['compact', 'normal', 'roomy'], 'vertical rhythm', { optional: true }),
+  figure: oneOf(['outline', 'solid', 'minimal'], 'diagram and chart treatment', { optional: true })
+};
+
 export const META = {
   title: str('document title'),
   subtitle: str('deck line', { optional: true }),
@@ -306,7 +314,15 @@ export const META = {
   abstract: str('abstract paragraph', { optional: true }),
   indexTerms: arr(str('term'), 'index terms', { optional: true }),
   footer: str('footer note', { optional: true }),
-  accent: str('accent color override, any CSS color', { optional: true })
+  accent: str('accent color override, any CSS color', { optional: true }),
+  style: obj(STYLE, 'per-source style tokens: palette, seed, type, density, figure', {
+    optional: true,
+    check(value, path, err) {
+      if (value?.seed && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.seed)) {
+        err(`${path}.seed`, 'must be a hex color like #2f6f8f');
+      }
+    }
+  })
 };
 
 export const THEMES = {

@@ -3,6 +3,7 @@
   "theme": "paper-dark",
   "meta": {
     "title": "The End of Harness Engineering",
+    "style": { "seed": "#c9703f", "type": "editorial", "density": "normal", "figure": "outline" },
     "subtitle": "the loop writes the harness, the human writes the exam",
     "author": "Reading notes on a 2026 paper by a team of Chinese researchers",
     "date": "2026",
@@ -146,7 +147,7 @@
           }
         ],
         "annotations": [
-          { "text": "hand-written baseline v0", "x": 0.2, "y": 0.9 }
+          { "text": "hand-written baseline v0", "x": 0.12, "y": 2.7 }
         ]
       }
     },
