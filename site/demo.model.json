@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "theme": "paper-dark",
+  "meta": {
+    "title": "A document that reads itself",
+    "subtitle": "living-docs, narrated by its own timeline",
+    "kicker": "living-docs",
+    "runningHead": "Self-portrait",
+    "footer": "living-docs",
+    "style": {
+      "density": "compact",
+      "figure": "outline"
+    }
+  },
+  "blocks": [
+    {
+      "type": "prose",
+      "id": "story",
+      "markdown": "[[mark:read|Every doc starts as a source, and living-docs keeps its outline.]] [[mark:draft|It drafts a model, picking a look and a timeline from the text itself.]] [[mark:render|The engine renders one self-contained HTML file.]] [[mark:play|Cues play in step with the sentences, and the same timeline exports as MP4, WebM, or GIF.]]"
+    },
+    {
+      "type": "figure",
+      "id": "pipeline",
+      "caption": "From a source to a page and a clip. Each step is a command, and every step before the render is plain JSON you can edit.",
+      "spec": "diagram",
+      "span": "page",
+      "diagram": {
+        "width": 408,
+        "height": 196,
+        "nodes": [
+          {
+            "id": "source",
+            "label": "source",
+            "sub": "paper or notes",
+            "x": 12,
+            "y": 24,
+            "w": 112,
+            "h": 56
+          },
+          {
+            "id": "outline",
+            "label": "outline",
+            "sub": "sections, ids",
+            "x": 148,
+            "y": 24,
+            "w": 112,
+            "h": 56
+          },
+          {
+            "id": "model",
+            "label": "model",
+            "sub": "validated JSON",
+            "x": 284,
+            "y": 24,
+            "w": 112,
+            "h": 56,
+            "kind": "accent"
+          },
+          {
+            "id": "page",
+            "label": "page",
+            "sub": "one HTML file",
+            "x": 284,
+            "y": 116,
+            "w": 112,
+            "h": 56
+          },
+          {
+            "id": "clip",
+            "label": "clip",
+            "sub": "mp4, webm, gif",
+            "x": 148,
+            "y": 116,
+            "w": 112,
+            "h": 56
+          }
+        ],
+        "edges": [
+          {
+            "from": "source",
+            "to": "outline",
+            "style": "arrow"
+          },
+          {
+            "from": "outline",
+            "to": "model",
+            "style": "arrow"
+          },
+          {
+            "from": "model",
+            "to": "page",
+            "style": "arrow"
+          },
+          {
+            "from": "page",
+            "to": "clip",
+            "style": "arrow"
+          }
+        ]
+      }
+    },
+    {
+      "type": "stats",
+      "id": "facts",
+      "items": [
+        {
+          "label": "base themes",
+          "value": "3"
+        },
+        {
+          "label": "curated looks",
+          "value": "3"
+        },
+        {
+          "label": "cue verbs",
+          "value": "7"
+        },
+        {
+          "label": "clip formats",
+          "value": "3"
+        }
+      ]
+    }
+  ],
+  "timeline": {
+    "loop": true,
+    "duration": 14,
+    "cues": [
+      {
+        "at": 0.4,
+        "dur": 2,
+        "do": "highlight",
+        "target": "mark:read"
+      },
+      {
+        "at": 0.4,
+        "dur": 2,
+        "do": "focus",
+        "target": "pipeline/source"
+      },
+      {
+        "at": 2.9,
+        "dur": 2,
+        "do": "highlight",
+        "target": "mark:draft"
+      },
+      {
+        "at": 2.9,
+        "dur": 1,
+        "do": "focus",
+        "target": "pipeline/outline"
+      },
+      {
+        "at": 3.9,
+        "dur": 1,
+        "do": "focus",
+        "target": "pipeline/model"
+      },
+      {
+        "at": 5.6,
+        "dur": 2,
+        "do": "highlight",
+        "target": "mark:render"
+      },
+      {
+        "at": 5.6,
+        "dur": 2,
+        "do": "focus",
+        "target": "pipeline/page"
+      },
+      {
+        "at": 8.1,
+        "dur": 2.4,
+        "do": "highlight",
+        "target": "mark:play"
+      },
+      {
+        "at": 8.1,
+        "dur": 2.4,
+        "do": "focus",
+        "target": "pipeline/clip"
+      },
+      {
+        "at": 10.9,
+        "dur": 1.8,
+        "do": "count",
+        "target": "facts"
+      }
+    ]
+  }
+}

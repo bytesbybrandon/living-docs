@@ -251,3 +251,40 @@ test('ffmpeg only ever receives a local file path', () => {
   assert.throws(() => ffmpegTarget(''), { code: 'bad-output' });
   assert.throws(() => ffmpegTarget(undefined), { code: 'bad-output' });
 });
+
+test('a host page can pause the live clock, scrub it with seek, then play or replay', { skip: !chromiumReady && 'playwright chromium not installed' }, async () => {
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+    await page.setContent(renderDoc(base()).html);
+    const focus = () => page.evaluate(() => Number(document.querySelector('[data-cue="loop"] [data-part="b"]').style.getPropertyValue('--ld-f') || 0));
+    await page.waitForFunction(() => typeof window.__ld.pause === 'function');
+    await page.evaluate(() => { window.__ld.pause(); window.__ld.seek(2.75); });
+    await page.waitForTimeout(400);
+    assert.equal(await focus(), 1, 'the live clock must not overwrite a scrubbed frame');
+    assert.equal(await page.evaluate(() => window.__ld.time()), 2.75);
+    await page.evaluate(() => window.__ld.play());
+    await page.waitForTimeout(300);
+    assert.ok(await page.evaluate(() => window.__ld.time()) > 2.9, 'play resumes from the scrubbed time');
+    await page.evaluate(() => window.__ld.replay());
+    await page.waitForTimeout(150);
+    assert.ok(await page.evaluate(() => window.__ld.time()) < 1, 'replay restarts the clock');
+  } finally {
+    await browser.close();
+  }
+});
+
+test('exports a webm through ffmpeg', { skip: (!chromiumReady || !ffmpegReady) && 'needs playwright chromium and ffmpeg' }, async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ld-video-'));
+  try {
+    const model = base();
+    model.timeline.duration = 1;
+    const out = path.join(dir, 'doc.webm');
+    const result = await exportVideo(model, { format: 'webm', size: '320x400', fps: 6, out });
+    assert.equal(result.frames, 6);
+    assert.deepEqual([...fs.readFileSync(out).subarray(0, 4)], [0x1a, 0x45, 0xdf, 0xa3], 'EBML header');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

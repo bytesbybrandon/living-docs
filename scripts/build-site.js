@@ -4,6 +4,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ingestSource, draftModel } from '../src/ingest/index.js';
 import { renderDoc } from '../src/render/index.js';
 import { escapeHtml } from '../src/model/markdown.js';
+import { mix, ensureContrast, contrastRatio } from '../src/render/style.js';
+import { palette as lightPalette } from '../src/render/themes/paper-light.js';
+import { palette as darkPalette } from '../src/render/themes/paper-dark.js';
+import { palette as hudPalette } from '../src/render/themes/hud.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'https://github.com/bytesbybrandon/living-docs';
@@ -28,11 +32,43 @@ const SAMPLES = [
 ];
 
 const THEME_LABEL = { 'paper-light': 'paper-light', 'paper-dark': 'paper-dark', hud: 'hud' };
-const THEME_BEST = {
-  'paper-light': 'Research papers, technical reports, source-code studies.',
-  'paper-dark': 'Reading notes, essays, annotated summaries.',
-  hud: 'Repo audits, skill catalogs, system snapshots.'
-};
+
+// The home page demo: one model, three skins. The page takes the palette of the theme on the stage.
+const SKINS = [
+  { theme: 'paper-light', label: 'Paper light', palette: lightPalette, scheme: 'light', mono: false },
+  { theme: 'paper-dark', label: 'Paper dark', palette: darkPalette, scheme: 'dark', mono: false },
+  { theme: 'hud', label: 'Console', palette: hudPalette, scheme: 'dark', mono: true }
+];
+const DEFAULT_SKIN = 'paper-dark';
+const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif';
+const SANS = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
+const MONO = 'ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace';
+
+function skinTokens({ palette: p, scheme, mono }) {
+  const paper = scheme === 'light' ? mix(p.hair, p.bg, 0.5) : mix(p.bg, '#000000', 0.45);
+  const accent = ensureContrast(p.accent, paper, 4.6);
+  const onAccent = contrastRatio(paper, accent) >= contrastRatio(p.ink, accent) ? paper : p.ink;
+  return [
+    ['--color-paper', paper],
+    ['--color-paper-2', p.surface],
+    ['--color-ink', p.ink],
+    ['--color-ink-2', mix(p.ink, paper, 0.22)],
+    ['--color-muted', ensureContrast(p.muted, paper, 4.6)],
+    ['--color-rule', mix(p.hair, p.ink, 0.3)],
+    ['--color-accent', accent],
+    ['--color-accent-ink', ensureContrast(onAccent, accent, 4.5)],
+    ['--color-focus', p.ink],
+    ['--font-display', mono ? MONO : SERIF],
+    ['color-scheme', scheme]
+  ].map(([name, value]) => `${name}: ${value};`).join(' ');
+}
+
+function skinCss() {
+  const shared = `--font-body: ${SANS}; --font-mono: ${MONO};`;
+  const blocks = SKINS.map(skin => `html[data-theme="${skin.theme}"] { ${skinTokens(skin)} }`);
+  const base = SKINS.find(skin => skin.theme === DEFAULT_SKIN);
+  return `:root { ${shared} ${skinTokens(base)} }\n${blocks.join('\n')}`;
+}
 
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const write = (outDir, rel, content) => {
@@ -160,13 +196,58 @@ function buildGallery(outDir) {
   return entries;
 }
 
-function themeCard(entry, rel) {
-  const kb = Math.round(entry.stats.bytes / 1024);
-  return `        <article class="card">
-          ${frame(`${rel}gallery/${entry.id}.html`, entry.title)}
-          <div class="meta"><div class="tag">${THEME_LABEL[entry.theme]}</div><h3>${escapeHtml(entry.title)}</h3><p>${escapeHtml(THEME_BEST[entry.theme])}</p></div>
-          <div class="links"><a href="${rel}gallery/${entry.id}.html">Open</a><a href="${rel}gallery/${entry.id}.model.json">Model JSON</a><span style="color:var(--fg-tertiary);margin-left:auto;font-weight:400">${kb} KB</span></div>
-        </article>`;
+/** Render the demo model once per skin; the home page pins one of them and plays its timeline. */
+function buildDemo(outDir) {
+  const model = JSON.parse(read('site/demo.model.json'));
+  for (const skin of SKINS) {
+    const result = renderDoc(model, { theme: skin.theme });
+    if (!result.ok) throw new Error(`demo ${skin.theme}: ${result.errors.map(e => `${e.path} ${e.message}`).join('; ')}`);
+    write(outDir, `demo/${skin.theme}.html`, result.html);
+  }
+  write(outDir, 'demo/model.json', JSON.stringify(model, null, 2) + '\n');
+}
+
+function homeBody() {
+  const radios = SKINS.map(skin => `          <input type="radio" name="skin" id="skin-${skin.theme}" value="${skin.theme}"${skin.theme === DEFAULT_SKIN ? ' checked' : ''}><label for="skin-${skin.theme}">${skin.label}</label>`).join('\n');
+  const frames = SKINS.map(skin => {
+    const live = skin.theme === DEFAULT_SKIN;
+    return `        <iframe data-skin="${skin.theme}" ${live ? `src="demo/${skin.theme}.html"` : `data-src="demo/${skin.theme}.html" hidden`} title="Live demo document, ${skin.label}" scrolling="no" tabindex="-1"></iframe>`;
+  }).join('\n');
+  return read('site/home.html')
+    .replace('%%SKINS%%', radios)
+    .replace('%%FRAMES%%', frames)
+    .replaceAll('%%REPO%%', REPO)
+    .replaceAll('%%NPM%%', NPM);
+}
+
+function homePage() {
+  const title = 'living-docs: docs that explain themselves';
+  const description = 'Turn any source into one self-contained page that highlights as it explains, and export the same timeline as MP4, WebM, or GIF. AXI CLI and MCP server.';
+  return `<!doctype html>
+<html lang="en" data-theme="${DEFAULT_SKIN}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="living-docs">
+<meta name="description" content="${escapeHtml(description)}">
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${SITE_URL}">
+<meta property="og:image" content="${SITE_URL}img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>${escapeHtml(title)}</title>
+<style>${read('site/home.css').replace('/*SKINS*/', () => skinCss())}</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="container"><a class="brand" href="./index.html">living-docs</a><nav aria-label="Site"><a href="./gallery/index.html">Gallery</a><a href="./guide/index.html">Guide</a><a href="${REPO}">GitHub</a></nav></div></header>
+${homeBody()}
+<footer class="site-foot"><div class="container"><span>MIT licensed. Needs Node 20 or newer.</span><span><a href="${REPO}">GitHub</a> <a href="${NPM}">npm</a> <a href="${REPO}/blob/main/ARCHITECTURE.md">Architecture</a></span></div></footer>
+<script>${read('site/home.js')}</script>
+</body>
+</html>
+`;
 }
 
 function galleryIndex(outDir, entries) {
@@ -192,19 +273,9 @@ export async function buildSite({ outDir = path.join(root, 'site', 'dist') } = {
   galleryIndex(outDir, entries);
   const guide = await buildGuide(outDir);
 
-  const cards = entries.map(entry => themeCard(entry, './')).join('\n');
-  const hero = entries.find(entry => entry.id === 'end-of-harness-engineering') || entries[0];
-  const home = read('site/home.html')
-    .replace('%%HERO_SHOT%%', frame(`./gallery/${hero.id}.html`, hero.title))
-    .replace('%%THEME_CARDS%%', cards)
-    .replaceAll('%%REPO%%', REPO);
-  write(outDir, 'index.html', shell({
-    title: 'living-docs: sources become living docs',
-    description: 'Turn a book, paper, or repo audit into one self-contained HTML page as an academic paper, dark reading notes, or a telemetry console. AXI CLI and MCP server.',
-    rel: './',
-    active: 'home',
-    body: home
-  }));
+  buildDemo(outDir);
+  write(outDir, 'index.html', homePage());
+  fs.cpSync(path.join(root, 'site', 'img'), path.join(outDir, 'img'), { recursive: true });
   write(outDir, '404.html', shell({
     title: 'Not found | living-docs',
     description: 'Page not found.',

@@ -231,7 +231,8 @@ const RUNTIME = `
     }
   }
 
-  function seek(t){ applyCues(t); applyAmbient(t); }
+  var shown = 0;
+  function seek(t){ shown = t; applyCues(t); applyAmbient(t); }
   window.__ld = { duration: duration, seek: seek };
   window.addEventListener('beforeprint', function(){ seek(duration); });
 
@@ -245,8 +246,9 @@ const RUNTIME = `
   gates.forEach(function(g){ g.root = g.el.closest('[data-cue]') || g.el; g.root.__ldDelay = 0; });
   function shift(g){ return g.root.__ldDelay; }
   function belowFold(el){ return el.getBoundingClientRect().top > window.innerHeight; }
-  var last = null, wall = 0, cueT = 0, cycle = 0;
+  var last = null, wall = 0, cueT = 0, cycle = 0, running = true, paused = false;
   function frame(now){
+    if (paused) { running = false; return; }
     var dt = last === null ? 0 : Math.min(.1, (now - last) / 1000);
     last = now;
     wall += dt;
@@ -267,8 +269,26 @@ const RUNTIME = `
     }
     applyCues(Math.min(cueT, duration + maxDelay), cycle > 0, shift);
     applyAmbient(wall, true);
-    if (data.loop || cueT < duration + maxDelay || (window.__ldHooks || []).length) requestAnimationFrame(frame);
+    shown = cueT;
+    if (data.loop || cueT < duration + maxDelay || (window.__ldHooks || []).length) requestAnimationFrame(frame); else running = false;
   }
+  function start(){ if (!running) { running = true; last = null; requestAnimationFrame(frame); } }
+  // Live controls for a host page: pause() hands the clock to seek(t), play() resumes from the last shown time.
+  window.__ld.time = function(){ return shown; };
+  window.__ld.pause = function(){ paused = true; };
+  window.__ld.play = function(){
+    if (!paused && running) return;
+    cueT = Math.min(shown, duration);
+    gates.forEach(function(g){ g.root.__ldDelay = 0; });
+    paused = false;
+    start();
+  };
+  window.__ld.replay = function(){
+    cueT = 0; cycle = 0; shown = 0;
+    gates.forEach(function(g){ g.root.__ldDelay = 0; });
+    paused = false;
+    start();
+  };
   seek(0);
   requestAnimationFrame(frame);
 })();
