@@ -50,7 +50,7 @@ Install the package globally or run it without installing.
 
 1. **Install from npm:**
    ```bash
-   npm install -g @bytesbybrandon/living-docs
+   npm install -g living-docs-axi
    ```
 2. **Or clone the repository:**
    ```bash
@@ -85,7 +85,7 @@ node bin/living-docs-axi.js render docs/note.model.json --theme paper-dark -o do
 node bin/living-docs-axi.js preview docs
 ```
 
-With the published package, use `npx -y -p @bytesbybrandon/living-docs living-docs-axi` for each command.
+With the published package, use `npx -y living-docs-axi` for each command.
 
 Detailed references:
 

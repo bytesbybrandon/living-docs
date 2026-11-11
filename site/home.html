@@ -4,8 +4,8 @@
       <h1>Docs that explain themselves</h1>
       <p class="lead">Turn any source into a page that highlights as it explains.</p>
       <div class="cmd" role="group" aria-label="Install command">
-        <code>npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json</code>
-        <button type="button" class="btn primary" data-copy="npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
+        <code>npx -y living-docs-axi ingest notes.md --draft -o notes.json</code>
+        <button type="button" class="btn primary" data-copy="npx -y living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
       </div>
       <p class="aside"><a href="gallery/index.html">Browse the gallery</a></p>
     </header>
@@ -87,7 +87,7 @@
           <button type="button" class="btn" data-copy="living-docs-axi render notes.json --format mp4 -o notes.mp4">Copy</button>
         </div>
       </div>
-      <p class="note">Run them through <code>npx -y -p @bytesbybrandon/living-docs</code>. Video also needs <code>playwright</code> and <code>ffmpeg</code>; the <a href="guide/timeline.html">timeline guide</a> has the exact call.</p>
+      <p class="note">Put <code>npx -y</code> in front of each, or install it once with <code>npm i -g living-docs-axi</code>. Video also needs <code>playwright</code> and <code>ffmpeg</code>; the <a href="guide/timeline.html">timeline guide</a> has the exact call.</p>
     </div>
   </section>
 
@@ -100,7 +100,7 @@
   "mcpServers": {
     "living-docs": {
       "command": "npx",
-      "args": ["-y", "-p", "@bytesbybrandon/living-docs", "living-docs-mcp"]
+      "args": ["-y", "-p", "living-docs-axi", "living-docs-mcp"]
     }
   }
 }</pre>
@@ -132,8 +132,8 @@
       <h2 id="close-h"><span class="wash">Give it your notes</span></h2>
       <div>
       <div class="cmd" role="group" aria-label="Install command">
-        <code>npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json</code>
-        <button type="button" class="btn primary" data-copy="npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
+        <code>npx -y living-docs-axi ingest notes.md --draft -o notes.json</code>
+        <button type="button" class="btn primary" data-copy="npx -y living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
       </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ The package ships a stdio MCP server over the same core as the CLI.
   "mcpServers": {
     "living-docs": {
       "command": "npx",
-      "args": ["-y", "-p", "@bytesbybrandon/living-docs", "living-docs-mcp"]
+      "args": ["-y", "-p", "living-docs-axi", "living-docs-mcp"]
     }
   }
 }

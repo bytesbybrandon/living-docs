@@ -48,10 +48,10 @@ Unknown flags fail loud instead of being ignored.
 ## Examples
 
 ```bash
-npx -y -p @bytesbybrandon/living-docs living-docs-axi themes
-npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest samples/source/harness-notes.md --draft -o docs/draft.model.json
-npx -y -p @bytesbybrandon/living-docs living-docs-axi render docs/draft.model.json --theme paper-dark -o docs/draft.html
-npx -y -p @bytesbybrandon/living-docs living-docs-axi preview docs --no-open
+npx -y living-docs-axi themes
+npx -y living-docs-axi ingest samples/source/harness-notes.md --draft -o docs/draft.model.json
+npx -y living-docs-axi render docs/draft.model.json --theme paper-dark -o docs/draft.html
+npx -y living-docs-axi preview docs --no-open
 ```
 
 ## See also
