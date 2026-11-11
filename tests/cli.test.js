@@ -21,7 +21,7 @@ test('home view is content first', () => {
   assert.equal(code, 0);
   assert.match(out, /^bin: /);
   assert.match(out, /^description: /m);
-  assert.match(out, /themes\[3\]\{name,best\}:/);
+  assert.match(out, /themes\[6\]\{name,best\}:/);
   assert.match(out, /Run `living-docs-axi ingest/);
 });
 

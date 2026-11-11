@@ -38,23 +38,19 @@ function anchor(node, px, py) {
   return { x: cx + dx * s, y: cy + dy * s };
 }
 
-function iconMarkup(node, palette) {
-  const cx = node.x + node.w / 2;
-  const cy = node.y + node.h / 2;
+// Icons sit in a 13-unit band at the top of the node's text block, so they never touch the label.
+function iconMarkup(node, palette, top) {
+  const at = `transform="translate(${round(node.x + node.w / 2)} ${round(top)})"`;
   const stroke = palette.accent;
   switch (node.icon) {
     case 'file':
-      return `<g class="d-icon" fill="none" stroke="${stroke}" stroke-width="1.2">
-        <path d="M ${cx - 7} ${cy - 18} h 10 l 4 4 v 13 h -14 z"/><path d="M ${cx + 3} ${cy - 18} v 4 h 4"/>
-      </g>`;
+      return `<g class="d-icon" ${at} fill="none" stroke="${stroke}" stroke-width="1.2"><path d="M -6 0 h 8 l 4 4 v 9 h -12 z"/><path d="M 2 0 v 4 h 4"/></g>`;
     case 'clock':
-      return `<g class="d-icon" fill="none" stroke="${stroke}" stroke-width="1.2">
-        <circle cx="${cx}" cy="${cy - 10}" r="7"/><path d="M ${cx} ${cy - 14} v 4 l 3 2"/>
-      </g>`;
+      return `<g class="d-icon" ${at} fill="none" stroke="${stroke}" stroke-width="1.2"><circle cx="0" cy="6.5" r="6.3"/><path d="M 0 3 v 3.5 l 2.6 1.8"/></g>`;
     case 'star':
-      return `<path class="d-icon" d="M ${cx} ${cy - 20} l 2.4 5.6 6 .7 -4.4 4.2 1.2 5.9 -5.2 -2.9 -5.2 2.9 1.2 -5.9 -4.4 -4.2 6 -.7 z" fill="${stroke}" stroke="none"/>`;
+      return `<path class="d-icon" ${at} d="M 0 0 l 2 4.6 5 .6 -3.7 3.4 1 4.9 -4.3 -2.4 -4.3 2.4 1 -4.9 -3.7 -3.4 5 -.6 z" fill="${stroke}" stroke="none"/>`;
     case 'badge':
-      return `<g class="d-icon"><rect x="${cx - 9}" y="${cy - 16}" width="18" height="11" rx="1.5" fill="none" stroke="${stroke}" stroke-width="1.1"/><path d="M ${cx - 5} ${cy - 10.5} h 10" stroke="${stroke}" stroke-width="1.1"/></g>`;
+      return `<g class="d-icon" ${at} fill="none" stroke="${stroke}" stroke-width="1.1"><rect x="-9" y="1" width="18" height="11" rx="1.5"/><path d="M -5 6.5 h 10"/></g>`;
     default:
       return '';
   }
@@ -113,7 +109,7 @@ export function diagramSvg(spec, palette, { figure = 'outline', motion = 'none' 
     if (edge.route === 'elbow' || (edge.style === 'dashed' && Math.abs(toCenter.y - fromCenter.y) > 40)) {
       const midX = round((start.x + end.x) / 2);
       d = `M ${round(start.x)} ${round(start.y)} H ${midX} V ${round(end.y)} H ${round(end.x)}`;
-      labelPoint = { x: midX, y: (start.y + end.y) / 2, anchor: 'middle' };
+      labelPoint = { x: midX + 8, y: (start.y + end.y) / 2 + 4, anchor: 'start' }; // beside the vertical run, not across it
     } else {
       d = `M ${round(start.x)} ${round(start.y)} L ${round(end.x)} ${round(end.y)}`;
       labelPoint = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2, anchor: 'middle' };
@@ -150,18 +146,19 @@ export function diagramSvg(spec, palette, { figure = 'outline', motion = 'none' 
     const strokeWidth = node.kind === 'accent' ? 1.5 : minimal ? 0.8 : solid ? 1.3 : 1;
     const dash = node.kind === 'dashed' ? ' stroke-dasharray="5 4"' : '';
     const opacity = node.kind === 'dashed' ? ' stroke-opacity="0.75"' : '';
-    const iconSpace = node.icon && node.icon !== 'none' ? 14 : 0;
+    const iconSpace = node.icon && node.icon !== 'none' ? 18 : 0;
     const lines = wrapLabel(node.label, Math.max(8, Math.floor((node.w - 16) / 6.5)), 3);
     const lineHeight = 15;
     const blockHeight = lines.length * lineHeight + (node.sub ? 13 : 0) + iconSpace;
-    let textY = node.y + (node.h - blockHeight) / 2 + lineHeight - 4 + iconSpace;
+    const blockTop = node.y + (node.h - blockHeight) / 2;
+    let textY = blockTop + lineHeight - 4 + iconSpace;
 
-    nodeMarkup.push(`<g class="d-node d-node-${node.kind}" style="--i:${nodeIndex++}">`);
+    nodeMarkup.push(`<g class="d-node d-node-${node.kind}" data-part="${escapeHtml(node.id)}" style="--i:${nodeIndex++}">`);
     if (node.kind === 'stack') {
       nodeMarkup.push(`<rect x="${node.x + 5}" y="${node.y + 5}" width="${node.w}" height="${node.h}" rx="2" fill="${palette.surface}" stroke="${palette.muted}" stroke-opacity="0.5"/>`);
     }
     nodeMarkup.push(`<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash}${opacity}/>`);
-    nodeMarkup.push(iconMarkup(node, palette));
+    nodeMarkup.push(iconMarkup(node, palette, blockTop));
     for (const line of lines) {
       nodeMarkup.push(`<text x="${round(node.x + node.w / 2)}" y="${round(textY)}" text-anchor="middle" font-size="13" fill="${palette.ink}" font-weight="${node.kind === 'accent' ? 600 : 400}">${escapeHtml(line)}</text>`);
       textY += lineHeight;

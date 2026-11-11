@@ -327,6 +327,31 @@ export const META = {
   })
 };
 
+// Any block may carry an id so timeline cues can target it.
+export const BLOCK_ID = str('cue anchor: lowercase letters, digits, hyphens; unique in the document', { optional: true });
+
+export const CUE_ACTIONS = {
+  highlight: 'sweep a highlighter across a [[mark:id|text]] sentence or a block, then leave a faint underline',
+  focus: 'light up a block or part (diagram node, panel, scene label) and dim its siblings',
+  reveal: 'fade and rise a block or part into view at the cue time; hidden before it',
+  count: 'count the numbers inside the target up from zero',
+  type: 'type the text of the target out character by character',
+  camera: 'stage video only: scroll the frame to a block or part, or back to "page" (flat at 100% unless zoom is set)',
+  activate: 'hud scene only: glide the crosshair to a scene label (target "<sceneId>/<label>")'
+};
+
+export const TIMELINE = {
+  duration: num('total seconds; default last cue end plus 1.5', { optional: true }),
+  loop: bool('restart when the timeline ends (live page only)', { optional: true }),
+  cues: arr(obj({
+    at: num('start time in seconds'),
+    dur: num('seconds the cue runs, default 1.2', { optional: true }),
+    do: oneOf(Object.keys(CUE_ACTIONS), 'action'),
+    target: str('"mark:<id>", "<blockId>", "<blockId>/<part>" (diagram node id, panel index, scene label), or "page" for camera'),
+    zoom: num('camera only: opt-in scale, default 1 (flat)', { optional: true })
+  }, 'cue'), 'cues in any order')
+};
+
 export const THEMES = {
   'paper-light': {
     summary: 'Academic paper: serif, two justified columns, drop caps, margin stamp, print rules.',
@@ -335,6 +360,21 @@ export const THEMES = {
   'paper-dark': {
     summary: 'Reading notes: cream on carbon, orange accent, rules, algorithm boxes, takeaway strip.',
     best: 'paper summaries, essays, annotated readings'
+  },
+  'field-notes': {
+    base: 'paper-light',
+    summary: 'Warm cream paper, olive rules, italic titles.',
+    best: 'field reports, lab notes, reading journals'
+  },
+  editorial: {
+    base: 'paper-light',
+    summary: 'Magazine masthead: oversized left-set title, heavy rules, signal red.',
+    best: 'essays, features, opinion pieces'
+  },
+  blueprint: {
+    base: 'paper-dark',
+    summary: 'Drafting-table blue with a faint grid and cyan linework.',
+    best: 'architecture notes, system designs, specs'
   },
   hud: {
     summary: 'Telemetry console: monospaced 12-panel grid, cyan accents, graph hero, live clock.',

@@ -17,6 +17,7 @@ const GUIDE = [
   ['style-tokens', 'Style tokens', 'Palette, seed, type, density, figure, and motion'],
   ['mcp', 'MCP server', 'Client configuration and the five tools'],
   ['reactive-workflow', 'Reactive workflow', 'The optional agent workflow around the CLI'],
+  ['timeline', 'Timeline and video', 'Cues, drafted timelines, and MP4, WebM, or GIF export'],
   ['guarantees', 'Guarantees', 'Self-contained, deterministic, escaped, print ready']
 ];
 
@@ -118,7 +119,7 @@ async function buildGuide(outDir) {
   for (const [id, title, summary] of GUIDE) {
     const markdown = rewriteGuideLinks(read(`docs/guide/${id}.md`));
     const ingested = await ingestSource({ text: markdown, kind: 'markdown', title });
-    const model = draftModel(ingested, { theme: 'paper-dark' });
+    const model = draftModel(ingested, { theme: 'paper-dark', cues: false }); // reference pages stay still
     model.meta.kicker = 'living-docs guide';
     model.meta.runningHead = 'Guide';
     model.meta.subtitle = summary;

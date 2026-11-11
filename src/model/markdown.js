@@ -1,5 +1,5 @@
 // Small markdown subset: enough to ingest prose without pulling a parser stack.
-// Inline: `code`, **bold**, *italic*, ~~strike~~, [text](url), [[n]] footnote refs.
+// Inline: `code`, **bold**, *italic*, ~~strike~~, [text](url), [[n]] footnote refs, [[mark:id|text]] cue marks.
 // Blocks: ATX headings, paragraphs, fenced code, lists, blockquotes, pipe tables, rules.
 
 const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -13,6 +13,9 @@ export function safeUrl(url) {
   return null;
 }
 
+// [[mark:id|text]] wraps a source sentence so a timeline cue can point at it.
+export const MARK_RE = /\[\[mark:([a-z][a-z0-9-]*)\|([^\]\n]+)\]\]/g;
+
 export function renderInline(markdown, { allowLinks = true } = {}) {
   const source = String(markdown ?? '');
   const tokens = [];
@@ -21,7 +24,8 @@ export function renderInline(markdown, { allowLinks = true } = {}) {
     return `\u0000${tokens.length - 1}\u0000`;
   };
 
-  let text = source.replace(/`([^`\n]+)`/g, (_, code) => stash(`<code>${escapeHtml(code)}</code>`));
+  let text = source.replace(MARK_RE, (_, id, body) => stash(`<span class="ld-mark" data-mark="${id}">${renderInline(body, { allowLinks })}</span>`));
+  text = text.replace(/`([^`\n]+)`/g, (_, code) => stash(`<code>${escapeHtml(code)}</code>`));
 
   if (allowLinks) {
     text = text.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (_, label, url) => {
@@ -155,6 +159,7 @@ export function parseMarkdown(source) {
 
 export function plainText(markdown) {
   return String(markdown ?? '')
+    .replace(MARK_RE, '$2')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/\[\[(\d+)\]\]/g, '')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')

@@ -8,6 +8,7 @@ import { renderDoc, themeList } from '../render/index.js';
 import { validateDoc, formatErrors } from '../model/validate.js';
 import { BLOCKS, THEMES, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
+import { exportVideo, FORMATS } from '../export/video.js';
 
 const quoteCell = value => {
   const text = String(value ?? '');
@@ -33,7 +34,7 @@ function textResult(text) {
 const TOOLS = [
   {
     name: 'living_docs_themes',
-    description: 'List the three living-doc themes and what each is best for.',
+    description: 'List the living-doc themes and what each is best for.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false }
   },
   {
@@ -56,7 +57,9 @@ const TOOLS = [
         text: { type: 'string', description: 'Inline source text' },
         section: { type: 'string', description: 'Return one section: 1-based index or id' },
         draft: { type: 'boolean', description: 'Include a draft document model built from the source' },
-        theme: { type: 'string', enum: Object.keys(THEMES), description: 'Theme recorded on the draft' },
+        static: { type: 'boolean', description: 'Draft without the auto-generated timeline cues' },
+        seed: { type: 'string', description: 'Hex accent seed for the draft, overriding the one derived from the title' },
+        theme: { type: 'string', enum: Object.keys(THEMES), description: 'Theme for the draft; omit to let the source pick a look' },
         out: { type: 'string', description: 'Write the draft model JSON to this path' },
         max_chars: { type: 'number', description: 'Section text limit, default 12000' }
       },
@@ -65,7 +68,7 @@ const TOOLS = [
   },
   {
     name: 'living_docs_render',
-    description: 'Validate a document model and write a self-contained HTML doc. Accepts a model object, a model path, or a source to draft from.',
+    description: 'Validate a document model and write a self-contained HTML doc, or an mp4, webm, or gif of its timeline. Accepts a model object, a model path, or a source to draft from.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -73,7 +76,10 @@ const TOOLS = [
         model_path: { type: 'string', description: 'Path to a model JSON file' },
         source: { type: 'string', description: 'Source path or URL to ingest and draft from' },
         theme: { type: 'string', enum: Object.keys(THEMES) },
-        out: { type: 'string', description: 'Output HTML path, default docs/<title>-<theme>.html' }
+        out: { type: 'string', description: 'Output path, default docs/<title>-<theme>.<format>' },
+        format: { type: 'string', enum: ['html', ...FORMATS], description: 'html (default) or a video of the timeline; video needs playwright and ffmpeg' },
+        size: { type: 'string', description: 'Video stage size, default 1080x1350' },
+        fps: { type: 'number', description: 'Video frames per second, default 30' }
       },
       additionalProperties: false
     }
@@ -161,8 +167,7 @@ async function handle(name, args = {}) {
         toon('sections', ['index', 'id', 'title', 'words'], outline.sections.map(section => [section.index, section.id, section.title, section.words]))
       ];
       if (args.draft) {
-        const theme = args.theme || 'paper-dark';
-        const model = draftModel(ingested, { theme });
+        const model = draftModel(ingested, { theme: args.theme, seed: args.seed, cues: !args.static });
         const validation = validateDoc(model);
         if (!validation.ok) return toolError(`draft model invalid:\n${formatErrors(validation.errors)}`);
         if (args.out) {
@@ -185,10 +190,29 @@ async function handle(name, args = {}) {
       if (!model && args.source) {
         const isUrl = /^https?:\/\//i.test(args.source);
         const ingested = await ingestSource(isUrl ? { url: args.source } : { path: args.source });
-        model = draftModel(ingested, { theme: args.theme || 'paper-dark' });
+        model = draftModel(ingested, { theme: args.theme });
       }
       if (!model) return toolError('pass model, model_path, or source');
       const theme = args.theme || model.theme || 'paper-light';
+      if (args.format && args.format !== 'html') {
+        const out = args.out || path.join('docs', `${slugify(model.meta?.title || 'document')}-${theme}.${args.format}`);
+        fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
+        try {
+          const video = await exportVideo(model, { theme, baseDir, format: args.format, out, size: args.size, fps: args.fps });
+          return textResult([
+            'ok: true',
+            `file: ${path.resolve(out)}`,
+            `format: ${video.format}`,
+            `size: ${video.width}x${video.height}`,
+            `frames: ${video.frames}`,
+            `seconds: ${video.duration}`,
+            `bytes: ${fs.statSync(out).size}`
+          ].join('\n'));
+        } catch (error) {
+          if (error.name === 'RenderError') return toolError(`model invalid:\n${formatErrors(error.errors)}`);
+          return toolError(`${error.message}${error.hint ? `\nhint: ${error.hint}` : ''}`);
+        }
+      }
       const result = renderDoc(model, { theme, baseDir });
       if (!result.ok) return toolError(`model invalid:\n${formatErrors(result.errors)}`);
       const out = args.out || path.join('docs', `${slugify(model.meta.title)}-${theme}.html`);
@@ -235,7 +259,7 @@ export function createServer() {
     { name: 'living-docs', version: '0.1.0' },
     {
       capabilities: { tools: {} },
-      instructions: 'Turn source documents into designed living docs. Ingest to get an outline, author a document model against the schema, then render with paper-light, paper-dark, or hud.'
+      instructions: 'Turn source documents into designed living docs. Ingest to get an outline, author a document model against the schema, then render with a theme from living_docs_themes. A draft without a theme picks a look from the source.'
     }
   );
 

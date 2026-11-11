@@ -50,7 +50,9 @@ body{margin:0;background:#020409;color:var(--ink);font-family:var(--mono);font-s
 .scene-crosshair::before{content:"";position:absolute;left:50%;top:-80px;bottom:-80px;border-left:1px solid rgba(94,200,229,.14)}
 .scene-crosshair::after{content:"";position:absolute;top:50%;left:-80px;right:-80px;border-top:1px solid rgba(94,200,229,.14)}
 .scene-active-label{position:absolute;transform:translate(16px,-150%);padding:3px 9px;border:1px solid #3a7188;background:rgba(4,10,16,.86);font-size:11.5px;letter-spacing:.05em;color:#e6f7ff;white-space:nowrap}
+.scene-active-label.to-left{transform:translate(calc(-100% - 16px),-150%)}
 .scene-badge{position:absolute;transform:translate(16px,-50%);padding:2px 7px;border:1px solid #2a5568;background:#06222e;font-size:9px;letter-spacing:.14em;color:#8fd8ee}
+.scene-badge.to-left{transform:translate(calc(-100% - 16px),-50%)}
 .scene-card{position:absolute;transform:translate(26px,26px);min-width:236px;max-width:310px;border:1px solid #2a5568;background:rgba(4,12,19,.94);padding:12px 13px;font-size:10px;color:#9fc0cf;box-shadow:0 0 34px rgba(0,0,0,.65)}
 .sc-card-title{font-size:13.5px;color:#e6f7ff;margin-bottom:8px;letter-spacing:.03em}
 .sc-row{display:flex;justify-content:space-between;gap:14px;padding:2px 0;border-bottom:1px solid #0e1f2a}
@@ -217,7 +219,7 @@ tbody td{padding:5px 6px;color:#b7d4e1;border-bottom:1px solid #0a1822}
   .hud-head{flex-direction:column;gap:8px}
   .live{font-size:8px}
   .scene-stage{min-height:240px}
-  .scene-card{left:12px!important;top:auto!important;bottom:10px;transform:none;min-width:0;max-width:none;width:calc(100% - 24px)}
+  .scene-card{display:none}
   .scene-label{font-size:8px}
   .sc-tail{margin-left:0}
   .footnotes{column-count:1}
@@ -251,11 +253,14 @@ function head(model) {
 
 const RUNTIME = `
 (function(){
+  // With a timeline (ld-timed) the page clock drives everything through window.__ldHooks.
+  var timed = document.documentElement.classList.contains('ld-timed');
+  var hooks = window.__ldHooks = window.__ldHooks || [];
   var clocks = document.querySelectorAll('[data-clock]');
   var started = Date.now();
   function pad(n){ return String(n).padStart(2,'0'); }
-  function tick(){
-    var ms = Date.now() - started;
+  function tick(at){
+    var ms = timed ? at : Date.now() - started;
     var cs = Math.floor(ms / 10) % 100;
     var s = Math.floor(ms / 1000) % 60;
     var m = Math.floor(ms / 60000) % 60;
@@ -263,8 +268,8 @@ const RUNTIME = `
     var text = pad(h) + ':' + pad(m) + ':' + pad(s) + '.' + pad(cs);
     for (var i = 0; i < clocks.length; i++) clocks[i].textContent = text;
   }
-  tick();
-  setInterval(tick, 90);
+  if (timed) hooks.push(tick);
+  else { tick(); setInterval(tick, 90); }
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var scenes = document.querySelectorAll('.scene');
@@ -321,8 +326,10 @@ const RUNTIME = `
       }
 
       var active = nodes[data.active];
-      if (active) {
-        var ax = active.x * kx, ay = active.y * ky;
+      var moved = scene.__ldActive;
+      if (active || moved) {
+        var ax = moved ? moved.x / 100 * width : active.x * kx;
+        var ay = moved ? moved.y / 100 * height : active.y * ky;
         var pulse = reduce ? 1 : 0.5 + 0.5 * Math.sin(phase * 0.0014);
         ctx.beginPath();
         ctx.fillStyle = 'rgba(220,248,255,0.95)';
@@ -339,6 +346,10 @@ const RUNTIME = `
       }
     }
 
+    if (timed) {
+      hooks.push(draw);
+      return;
+    }
     if (reduce) {
       draw(0);
       return;

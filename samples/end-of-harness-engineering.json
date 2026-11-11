@@ -9,7 +9,7 @@
     "date": "2026",
     "kicker": "Reading notes · The End of Harness Engineering (2026)",
     "runningHead": "Harness engineering · loop engineering",
-    "abstract": "A harness is the program written around a model, and writing it by hand has been the skill. The paper argues that this is ending. A hand-written harness is one guess about one task on one afternoon; once it ships, it runs for months, unread and unscored. In the loop the paper describes, the harness is a file that grades itself: a small 4B model reads what failed and proposes 8 edits, and only the edit that scores best on held-out questions survives. This repeats every round. The big model stays frozen; only the file around it changes.",
+    "abstract": "A harness is the program written around a model, and writing it by hand has been the skill. The paper argues that this is ending. [[mark:guess|A hand-written harness is one guess about one task on one afternoon;]] once it ships, it runs for months, unread and unscored. In the loop the paper describes, the harness is a file that grades itself: [[mark:editor|a small 4B model reads what failed and proposes 8 edits]], and [[mark:best|only the edit that scores best on held-out questions survives]]. This repeats every round. [[mark:frozen|The big model stays frozen; only the file around it changes.]]",
     "indexTerms": [
       "harness engineering",
       "self-improving harness",
@@ -40,6 +40,7 @@
     },
     {
       "type": "figure",
+      "id": "loop",
       "caption": "Two ways to write a harness. The hand-written path is a single guess; the loop-written path reads failures, proposes edits, and keeps only what survives held-out scoring.",
       "spec": "diagram",
       "motion": "draw",
@@ -52,11 +53,11 @@
           { "id": "v0", "label": "harness v0", "sub": "one guess", "x": 214, "y": 130, "w": 140, "h": 62, "icon": "file" },
           { "id": "unscored", "label": "unscored", "sub": "never graded", "x": 78, "y": 240, "w": 150, "h": 52, "kind": "dashed" },
           { "id": "frozen", "label": "frozen big model", "sub": "e.g. Claude, never updated", "x": 402, "y": 130, "w": 180, "h": 62, "kind": "accent", "icon": "star" },
-          { "id": "failures", "label": "failures", "sub": "what went wrong", "x": 402, "y": 28, "w": 150, "h": 54, "kind": "accent" },
-          { "id": "editor", "label": "4B editor", "sub": "reads the failures", "x": 592, "y": 28, "w": 160, "h": 54 },
-          { "id": "held", "label": "held-out questions", "x": 786, "y": 28, "w": 170, "h": 54 },
-          { "id": "best", "label": "best edit kept", "sub": "1 of 8 survives", "x": 786, "y": 130, "w": 170, "h": 54 },
-          { "id": "file", "label": "harness file", "sub": "now v3", "x": 786, "y": 236, "w": 170, "h": 56, "icon": "file" }
+          { "id": "failures", "label": "failures", "sub": "what went wrong", "x": 384, "y": 28, "w": 140, "h": 54, "kind": "accent" },
+          { "id": "editor", "label": "4B editor", "sub": "reads the failures", "x": 552, "y": 28, "w": 150, "h": 54 },
+          { "id": "held", "label": "held-out questions", "x": 826, "y": 28, "w": 150, "h": 54 },
+          { "id": "best", "label": "best edit kept", "sub": "1 of 8 survives", "x": 826, "y": 130, "w": 150, "h": 54 },
+          { "id": "file", "label": "harness file", "sub": "now v3", "x": 826, "y": 236, "w": 150, "h": 56, "icon": "file" }
         ],
         "edges": [
           { "from": "person", "to": "v0", "style": "arrow" },
@@ -110,6 +111,7 @@
     },
     {
       "type": "figure",
+      "id": "score",
       "caption": "Held-out score by round. Each round the editor proposes eight edits; the seven rejected are grey, the kept one is orange. The harness changes only when an edit wins.",
       "spec": "chart",
       "motion": "steps",
@@ -176,5 +178,26 @@
         "Held-out questions are kept out of the editing step and used only for scoring."
       ]
     }
-  ]
+  ],
+  "timeline": {
+    "cues": [
+      { "at": 0.4, "dur": 2.2, "do": "highlight", "target": "mark:guess" },
+      { "at": 0.6, "dur": 1, "do": "focus", "target": "loop/person" },
+      { "at": 1.4, "dur": 1.1, "do": "focus", "target": "loop/v0" },
+      { "at": 2.8, "dur": 2.2, "do": "highlight", "target": "mark:editor" },
+      { "at": 3, "dur": 1, "do": "focus", "target": "loop/failures" },
+      { "at": 3.8, "dur": 1.1, "do": "focus", "target": "loop/editor" },
+      { "at": 5.2, "dur": 2.2, "do": "highlight", "target": "mark:best" },
+      { "at": 5.4, "dur": 1, "do": "focus", "target": "loop/held" },
+      { "at": 6.2, "dur": 1.1, "do": "focus", "target": "loop/best" },
+      { "at": 7.6, "dur": 2.2, "do": "highlight", "target": "mark:frozen" },
+      { "at": 7.8, "dur": 1, "do": "focus", "target": "loop/frozen" },
+      { "at": 8.6, "dur": 1.1, "do": "focus", "target": "loop/file" },
+      { "at": 10.2, "dur": 1.6, "do": "camera", "target": "loop/editor" },
+      { "at": 12.2, "dur": 1.4, "do": "camera", "target": "loop/best" },
+      { "at": 14, "dur": 1.8, "do": "camera", "target": "score" },
+      { "at": 15.4, "dur": 2, "do": "focus", "target": "score" },
+      { "at": 17.8, "dur": 1.8, "do": "camera", "target": "page" }
+    ]
+  }
 }

@@ -15,6 +15,18 @@ Every choice is curated and validated, so the page stays coherent, printable, an
 `meta.accent` remains available as a direct accent override.
 Invalid tokens fail validation at `meta.style`.
 
+## Looks and designed drafts
+
+Three themes set the structure: `paper-light`, `paper-dark`, and `hud`.
+Curated looks sit on a structure with their own palette and type: `field-notes` and `editorial` on `paper-light`, `blueprint` on `paper-dark`.
+A look is only a palette and a short stylesheet, so blocks, figures, timelines, and print behave exactly like the base theme.
+
+`ingest --draft` designs the doc from its source.
+Code-heavy sources get `blueprint`, papers get `paper-light`, long prose gets `editorial`, short notes get `field-notes`, and the rest get `paper-dark`.
+Paper themes also get an accent seed derived from the title, and density follows length.
+The draft writes these as ordinary `meta.style` tokens, so edit them freely.
+Pass `--theme` or `--seed` to override the choice.
+
 ## Motion
 
 Motion has two layers.

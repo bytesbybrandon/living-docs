@@ -18,8 +18,8 @@ function pages(dir = out) {
 
 test('builds home, gallery, guide, and a 404 page', () => {
   assert.equal(built.gallery, 3);
-  assert.equal(built.guide, 7);
-  for (const rel of ['index.html', '404.html', 'gallery/index.html', 'guide/index.html', 'guide/cli.html', 'gallery/harness-engineering.html', 'gallery/agent-skills-audit.model.json']) {
+  assert.equal(built.guide, 8);
+  for (const rel of ['index.html', '404.html', 'gallery/index.html', 'guide/index.html', 'guide/cli.html', 'guide/timeline.html', 'gallery/harness-engineering.html', 'gallery/agent-skills-audit.model.json']) {
     assert.ok(fs.existsSync(path.join(out, rel)), `${rel} exists`);
   }
 });

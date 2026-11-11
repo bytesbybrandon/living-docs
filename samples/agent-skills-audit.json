@@ -11,6 +11,7 @@
   },
   "blocks": [
     {
+      "id": "scene",
       "type": "graphScene",
       "title": "AI CONFIGS / OPEN SOURCE",
       "meta": ["SRC GITHUB", "5 TEAMS", "5 REPOS", "548.4K STARS", "$0"],
@@ -60,6 +61,7 @@
       }
     },
     {
+      "id": "grid",
       "type": "panels",
       "columns": 4,
       "items": [
@@ -256,6 +258,7 @@
       "markdown": "This page is a single moment in a repository audit: one matched skill, its repository, and the run that surfaced it. Every number on the console is a fact about that snapshot, not a projection. The graph counts nodes and links across five repositories; the coverage grid marks which job families each repository actually covers."
     },
     {
+      "id": "totals",
       "type": "stats",
       "items": [
         { "label": "Repositories scanned", "value": "5", "note": "github" },
@@ -270,5 +273,39 @@
       "title": "Reading the console",
       "body": "Panels are independent: each one answers a different question about the same snapshot. The hero graph shows adjacency, not importance; the coverage grid is the only panel that scores completeness."
     }
-  ]
+  ],
+  "timeline": {
+    "loop": true,
+    "duration": 16,
+    "cues": [
+      { "at": 0.2, "dur": 0.6, "do": "reveal", "target": "grid/01" },
+      { "at": 0.28, "dur": 0.6, "do": "reveal", "target": "grid/02" },
+      { "at": 0.36, "dur": 0.6, "do": "reveal", "target": "grid/03" },
+      { "at": 0.44, "dur": 0.6, "do": "reveal", "target": "grid/04" },
+      { "at": 0.52, "dur": 0.6, "do": "reveal", "target": "grid/05" },
+      { "at": 0.6000000000000001, "dur": 0.6, "do": "reveal", "target": "grid/06" },
+      { "at": 0.6799999999999999, "dur": 0.6, "do": "reveal", "target": "grid/07" },
+      { "at": 0.76, "dur": 0.6, "do": "reveal", "target": "grid/08" },
+      { "at": 0.8400000000000001, "dur": 0.6, "do": "reveal", "target": "grid/09" },
+      { "at": 0.9199999999999999, "dur": 0.6, "do": "reveal", "target": "grid/10" },
+      { "at": 1, "dur": 0.6, "do": "reveal", "target": "grid/11" },
+      { "at": 1.08, "dur": 0.6, "do": "reveal", "target": "grid/12" },
+      { "at": 0.6, "dur": 1.6, "do": "count", "target": "grid/02" },
+      { "at": 0.6, "dur": 1.6, "do": "count", "target": "grid/08" },
+      { "at": 0.8, "dur": 1.6, "do": "count", "target": "grid/11" },
+      { "at": 1, "dur": 2.4, "do": "type", "target": "grid/06" },
+      { "at": 1.2, "dur": 2.2, "do": "type", "target": "grid/09" },
+      { "at": 3, "dur": 1.4, "do": "activate", "target": "scene/spec-driven-development" },
+      { "at": 3.6, "dur": 1.8, "do": "focus", "target": "grid/03" },
+      { "at": 5.6, "dur": 1.4, "do": "activate", "target": "scene/code-review-and-quality" },
+      { "at": 6.2, "dur": 1.8, "do": "focus", "target": "grid/07" },
+      { "at": 8.2, "dur": 1.4, "do": "activate", "target": "scene/context-engineering" },
+      { "at": 8.8, "dur": 1.8, "do": "focus", "target": "grid/12" },
+      { "at": 10.8, "dur": 1.4, "do": "activate", "target": "scene/interview-me" },
+      { "at": 11.4, "dur": 1.8, "do": "focus", "target": "grid/04" },
+      { "at": 13.4, "dur": 1.4, "do": "camera", "target": "grid/08" },
+      { "at": 13.6, "dur": 1.2, "do": "count", "target": "grid/08" },
+      { "at": 14.9, "dur": 1, "do": "camera", "target": "page" }
+    ]
+  }
 }

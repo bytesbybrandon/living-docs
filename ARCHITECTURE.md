@@ -10,7 +10,8 @@ The engine is one core with three interfaces.
 | --- | --- | --- |
 | `src/model/` | document model schema, validation, safe inline Markdown | nothing |
 | `src/ingest/` | source formats to normalized blocks and outlines | model helpers |
-| `src/render/` | blocks to HTML, SVG generators, style resolution, themes | model, ingest output shapes |
+| `src/render/` | blocks to HTML, SVG generators, style resolution, themes, timeline runtime | model, ingest output shapes |
+| `src/export/` | video export: stage render, frame capture, ffmpeg encoding | render; optional playwright and ffmpeg |
 | `src/axi/` | command parsing, TOOL-style output, file writes, preview | ingest, render, schema |
 | `src/mcp/` | MCP tool definitions and result shaping | ingest, render, schema |
 | `src/server/preview.js` | local static preview and index | nothing |
@@ -27,13 +28,15 @@ Ingest returns an outline plus blocks and can emit a draft model that already va
 
 Figures are generated SVG: diagrams from positioned nodes and edges, charts from series and ticks, and the console hero from a seeded layout.
 Identifiers and graph positions derive from content, not randomness, so repeated renders match.
+Video export renders the same doc on a fixed stage, seeks each frame in headless Chromium, and pipes frames to ffmpeg; see `docs/decisions/0002-timeline-cues.md`.
 
 ## Invariants and boundaries
 
 - One HTML file per document: CSS, SVG, and the console runtime are inlined.
 - Text is escaped; only http, https, mailto, hash, and relative links survive.
 - Style tokens are an allowlist: palette, seed, type, density, and figure treatment. Accent colors are contrast corrected.
-- Motion is theme owned. The console animates and honors reduced motion; the paper themes stay static.
+- Motion is theme owned until a doc carries a `timeline`. Then one runtime drives every cue, canvas, and CSS animation from one clock, so each frame is a pure function of time; without a timeline no runtime ships and the paper themes stay static.
+- Print, reduced motion, and no script show a timeline's final state.
 - Image paths are inlined as data URIs, and a missing image degrades to a visible figure error.
 - PDF text extraction depends on the optional `unpdf` package and reports a typed error when it is missing.
 
@@ -41,5 +44,6 @@ Identifiers and graph positions derive from content, not randomness, so repeated
 
 - Tests cover determinism, self-containment, escaping, schema errors, ingest, CLI exit codes, MCP round trips, and style tokens.
 - Samples in `samples/` are the visual proof; `npm run samples` writes them to `docs/`.
-- Known gaps: no visual regression suite, no per-theme versioning, and no browser-based layout assertions.
+- Browser tests cover timeline seeking and frame determinism when Playwright Chromium is installed.
+- Known gaps: no visual regression suite and no per-theme versioning.
 - Decisions live in `docs/decisions/`.

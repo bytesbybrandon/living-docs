@@ -135,8 +135,27 @@ test('draft model does not repeat the abstract as the first paragraph', async ()
   const intro = 'This opening paragraph is long enough to be treated as the abstract of the document by the outline step, so it must not be printed twice.';
   const ingested = await ingestSource({ text: ['# Doc', '', intro, '', '## Part', '', 'Body of the part.'].join('\n'), kind: 'markdown' });
   assert.equal(ingested.meta.abstract, intro);
-  const model = draftModel(ingested);
+  const model = draftModel(ingested, { cues: false });
   const prose = model.blocks.filter(block => block.type === 'prose').map(block => block.markdown);
   assert.deepEqual(prose, ['Body of the part.']);
   assert.equal(model.meta.abstract, intro);
+});
+
+test('draft designs a look from the source and honors overrides', async () => {
+  const { draftDesign, chooseTheme, seedFromTitle } = await import('../src/ingest/style.js');
+  const code = { type: 'code', code: 'x', lang: 'js' };
+  const prose = { type: 'prose', markdown: 'word '.repeat(40) };
+  const notes = { schemaVersion: 1, meta: { title: 'Notes' }, blocks: [prose, prose] };
+  assert.equal(chooseTheme(notes), 'field-notes');
+  assert.equal(chooseTheme({ meta: { title: 'Api' }, blocks: [code, code, code, prose] }), 'blueprint');
+  assert.equal(chooseTheme({ meta: { title: 'Essay' }, blocks: Array.from({ length: 16 }, () => ({ type: 'prose', markdown: 'word '.repeat(120) })) }), 'editorial');
+  const paper = { meta: { title: 'A Paper', abstract: 'x' }, blocks: [{ type: 'heading', title: '1 Intro' }, prose] };
+  const design = draftDesign(paper);
+  assert.equal(design.theme, 'paper-light');
+  assert.match(design.style.seed, /^#[0-9a-f]{6}$/);
+  assert.equal(design.style.seed, seedFromTitle('A Paper', 'paper-light'));
+  assert.notEqual(seedFromTitle('A Paper', 'paper-light'), seedFromTitle('Another Title', 'paper-light'));
+  assert.equal(draftDesign(paper, { theme: 'editorial' }).style.seed, undefined);
+  assert.equal(draftDesign(paper, { seed: '#112233' }).style.seed, '#112233');
+  assert.throws(() => draftDesign(paper, { theme: 'nope' }));
 });
