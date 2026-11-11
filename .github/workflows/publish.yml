@@ -53,6 +53,13 @@ jobs:
           npm pkg set name=living-docs-axi
           version=$(node -p "require('./package.json').version")
           if npm view "living-docs-axi@$version" version >/dev/null 2>&1; then
+            # An existing version counts as done only when the same maintainers own both names,
+            # so a squatted living-docs-axi cannot make this step pass.
+            owners() { npm view "$1" maintainers --json | node -p "[].concat(JSON.parse(require('fs').readFileSync(0, 'utf8'))).map(m => String(m).split(' ')[0]).sort().join(',')"; }
+            if [ "$(owners living-docs-axi)" != "$(owners @bytesbybrandon/living-docs)" ]; then
+              echo "::error::living-docs-axi is owned by $(owners living-docs-axi), not by the maintainers of @bytesbybrandon/living-docs"
+              exit 1
+            fi
             echo "living-docs-axi@$version is already on npm"
           else
             npm publish --provenance --access public

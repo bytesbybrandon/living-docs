@@ -140,7 +140,10 @@ test('install commands use the short package name and the workflow publishes it 
   assert.match(read('site/home.html'), /npx -y living-docs-axi ingest notes\.md --draft/);
   const workflow = read('.github/workflows/publish.yml');
   assert.match(workflow, /npm pkg set name=living-docs-axi/);
-  assert.equal((workflow.match(/npm view /g) || []).length, 2, 'each publish step skips a version already on npm');
+  assert.match(workflow, /npm view "\$name@\$version"/, 'the scoped step skips a version already on npm');
+  assert.match(workflow, /npm view "living-docs-axi@\$version"/, 'the short step skips a version already on npm');
+  assert.match(workflow, /maintainers --json/, 'an existing short name only counts when the maintainers match the scoped package');
+  assert.match(workflow, /exit 1/);
   assert.equal((workflow.match(/npm publish --provenance --access public/g) || []).length, 2);
 });
 
