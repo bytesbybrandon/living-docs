@@ -1,6 +1,6 @@
 {
   "name": "@bytesbybrandon/living-docs",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Turn a source document into a designed, self-contained living doc: academic paper, dark reading notes, or telemetry console. Ships an AXI CLI and an MCP server.",
   "type": "module",
   "license": "MIT",
