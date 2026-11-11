@@ -36,5 +36,31 @@ jobs:
             echo "tag $GITHUB_REF_NAME does not match package version $version" >&2
             exit 1
           fi
-      - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
+      # The same code ships under two names: the scoped package for library imports and the short
+      # living-docs-axi for npx, which also avoids any scope-to-registry mapping on the user's side.
+      # Each step skips a version that is already on npm, so a half-finished release can be re-run.
+      - name: Publish @bytesbybrandon/living-docs with provenance
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm"
+          else
+            npm publish --provenance --access public
+          fi
+      - name: Publish living-docs-axi with provenance
+        run: |
+          npm pkg set name=living-docs-axi
+          version=$(node -p "require('./package.json').version")
+          if npm view "living-docs-axi@$version" version >/dev/null 2>&1; then
+            # An existing version counts as done only when the same maintainers own both names,
+            # so a squatted living-docs-axi cannot make this step pass.
+            owners() { npm view "$1" maintainers --json | node -p "[].concat(JSON.parse(require('fs').readFileSync(0, 'utf8'))).map(m => String(m).split(' ')[0]).sort().join(',')"; }
+            if [ "$(owners living-docs-axi)" != "$(owners @bytesbybrandon/living-docs)" ]; then
+              echo "::error::living-docs-axi is owned by $(owners living-docs-axi), not by the maintainers of @bytesbybrandon/living-docs"
+              exit 1
+            fi
+            echo "living-docs-axi@$version is already on npm"
+          else
+            npm publish --provenance --access public
+          fi

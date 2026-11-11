@@ -57,7 +57,7 @@ Video needs the optional `playwright` package with Chromium, and `ffmpeg` on `PA
 In a project, run `npm i -D playwright`; with npx, add it to the same call:
 
 ```bash
-npx -y -p @bytesbybrandon/living-docs -p playwright living-docs-axi render notes.model.json --format mp4
+npx -y -p living-docs-axi -p playwright living-docs-axi render notes.model.json --format mp4
 npx playwright install chromium
 ```
 
