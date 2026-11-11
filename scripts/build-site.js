@@ -31,9 +31,10 @@ const SAMPLES = [
   { id: 'agent-skills-audit', blurb: 'A repo audit as a telemetry console: graph hero, twelve panels, and a live clock.' }
 ];
 
-const THEME_LABEL = { 'paper-light': 'paper-light', 'paper-dark': 'paper-dark', hud: 'hud' };
+const THEME_LABEL = { 'paper-light': 'Paper light', 'paper-dark': 'Paper dark', hud: 'Console' };
 
-// The home page demo: one model, three skins. The page takes the palette of the theme on the stage.
+// Every site page wears a skin: the palette and type of one engine theme.
+// The home page switches skins with its demo; gallery rows each wear the skin of the document they show.
 const SKINS = [
   { theme: 'paper-light', label: 'Paper light', palette: lightPalette, scheme: 'light', mono: false },
   { theme: 'paper-dark', label: 'Paper dark', palette: darkPalette, scheme: 'dark', mono: false },
@@ -65,7 +66,7 @@ function skinTokens({ palette: p, scheme, mono }) {
 
 function skinCss() {
   const shared = `--font-body: ${SANS}; --font-mono: ${MONO};`;
-  const blocks = SKINS.map(skin => `html[data-theme="${skin.theme}"] { ${skinTokens(skin)} }`);
+  const blocks = SKINS.map(skin => `[data-theme="${skin.theme}"] { ${skinTokens(skin)} }`);
   const base = SKINS.find(skin => skin.theme === DEFAULT_SKIN);
   return `:root { ${shared} ${skinTokens(base)} }\n${blocks.join('\n')}`;
 }
@@ -77,16 +78,27 @@ const write = (outDir, rel, content) => {
   fs.writeFileSync(file, content);
 };
 
-function bar(rel, active) {
-  const link = (key, label, href) => `<a href="${rel}${href}"${active === key ? ' aria-current="page"' : ''}>${label}</a>`;
-  return `<header class="ld-bar"><a class="brand" href="${rel}index.html"><i aria-hidden="true"></i>living-docs</a><nav aria-label="Site">${link('home', 'Home', 'index.html')}${link('gallery', 'Gallery', 'gallery/index.html')}${link('guide', 'Guide', 'guide/index.html')}<a class="gh" href="${REPO}">GitHub</a></nav></header>`;
+/** A page stylesheet is its Hallmark stamp, then the shared system with the skins filled in, then its own rules. */
+function pageCss(name) {
+  const lines = read(`site/${name}.css`).replace(/\r\n/g, '\n').split('\n');
+  let i = 0;
+  while (i < lines.length && /^(\/\*| \*)/.test(lines[i])) i++;
+  const system = read('site/system.css').replace('/*SKINS*/', () => skinCss());
+  return `${lines.slice(0, i).join('\n')}\n${system}\n${lines.slice(i).join('\n')}`;
 }
 
-const css = () => read('site/site.css');
+function siteNav(rel, active) {
+  const link = (key, label, href) => `<a href="${href}"${active === key ? ' aria-current="page"' : ''}>${label}</a>`;
+  return `<header class="nav"><div class="container"><a class="brand" href="${rel}index.html">living-docs</a><nav aria-label="Site">${link('gallery', 'Gallery', `${rel}gallery/index.html`)}${link('guide', 'Guide', `${rel}guide/index.html`)}${link('', 'GitHub', REPO)}</nav></div></header>`;
+}
 
-function shell({ title, description, rel, active, body }) {
+function siteFoot() {
+  return `<footer class="site-foot"><div class="container"><span>MIT licensed. Needs Node 20 or newer.</span><span><a href="${REPO}">GitHub</a> <a href="${NPM}">npm</a> <a href="${REPO}/blob/main/ARCHITECTURE.md">Architecture</a></span></div></footer>`;
+}
+
+function page({ title, description, css, rel, active, body, image, script = '' }) {
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-theme="${DEFAULT_SKIN}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -96,46 +108,33 @@ function shell({ title, description, rel, active, body }) {
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE_URL}">
-<meta name="color-scheme" content="dark">
+<meta property="og:image" content="${SITE_URL}img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <title>${escapeHtml(title)}</title>
-<style>${css()}</style>
+<style>${pageCss(css)}</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-${bar(rel, active)}
+${siteNav(rel, active)}
 ${body}
-<footer class="site"><div class="wrap"><span>MIT licensed &middot; built with living-docs</span><span><a href="${REPO}">GitHub</a> &middot; <a href="${NPM}">npm</a> &middot; <a href="${REPO}/blob/main/ARCHITECTURE.md">Architecture</a></span></div></footer>
-<script>
-document.querySelectorAll('[data-copy]').forEach(function(button){
-  button.addEventListener('click',function(){
-    var text=button.getAttribute('data-copy');
-    var done=function(){var old=button.textContent;button.textContent='Copied';setTimeout(function(){button.textContent=old},1400)};
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done)}
-  });
-});
-function fit(){
-  document.querySelectorAll('.shot').forEach(function(shot){
-    var frame=shot.querySelector('iframe');
-    if(frame){frame.style.transform='scale('+(shot.clientWidth/1440)+')'}
-  });
-}
-fit();
-window.addEventListener('resize',fit);
-if(window.ResizeObserver){document.querySelectorAll('.shot').forEach(function(s){new ResizeObserver(fit).observe(s)})}
-</script>
+${siteFoot()}${script ? `\n<script>${script}</script>` : ''}
 </body>
 </html>
 `;
 }
 
-const BAR_CSS = `.ld-bar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:24px;padding:10px 24px;background:rgba(9,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08);font:500 13px/1 "Inter","Segoe UI",system-ui,sans-serif}
-.ld-bar .brand{display:flex;align-items:center;gap:8px;color:#F4F4F6;font:600 13px/1 "SF Mono","JetBrains Mono",Menlo,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
-.ld-bar .brand i{width:7px;height:7px;border-radius:50%;background:#63B3ED;box-shadow:0 0 10px rgba(99,179,237,.8)}
-.ld-bar nav{display:flex;gap:16px;margin-left:auto;align-items:center}
-.ld-bar nav a{color:#A1A4B5;padding:6px 4px;text-decoration:none}
-.ld-bar nav a:hover,.ld-bar nav a[aria-current="page"]{color:#F4F4F6}
-.ld-bar nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 #63B3ED}
-@media (max-width:560px){.ld-bar{gap:12px;padding:10px 16px}.ld-bar nav{gap:12px}.ld-bar .gh{display:none}}
+// The bar injected into engine-rendered docs keeps its own scoped styles, since a doc loads no site CSS.
+function bar(rel, active) {
+  const link = (key, label, href, extra = '') => `<a href="${href}"${extra}${active === key ? ' aria-current="page"' : ''}>${label}</a>`;
+  return `<header class="ld-bar"><a class="brand" href="${rel}index.html">living-docs</a><nav aria-label="Site">${link('gallery', 'Gallery', `${rel}gallery/index.html`)}${link('guide', 'Guide', `${rel}guide/index.html`)}${link('', 'GitHub', REPO, ' class="gh"')}</nav></header>`;
+}
+
+const BAR_CSS = `.ld-bar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:24px;padding:0 24px;min-height:48px;background:#060504;border-bottom:1px solid #4a443c;font:500 14px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.ld-bar .brand{color:#ddd5c6;font:700 18px/1 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;letter-spacing:-.02em;text-decoration:none}
+.ld-bar nav{display:flex;gap:4px;margin-left:auto;align-items:center}
+.ld-bar nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:#aea79b;text-decoration:none}
+.ld-bar nav a:hover,.ld-bar nav a[aria-current="page"]{color:#ddd5c6;text-decoration:underline;text-decoration-color:#d1783c;text-underline-offset:.2em}
+@media (max-width:560px){.ld-bar{gap:12px;padding:0 16px}.ld-bar nav a{padding:0 8px}.ld-bar .gh{display:none}}
 .ld-bar[hidden]{display:none}
 @media print{.ld-bar{display:none}}`;
 
@@ -166,19 +165,16 @@ async function buildGuide(outDir) {
     write(outDir, `guide/${id}.html`, withBar(result.html, '../', 'guide'));
     pages.push({ id, title, summary });
   }
-  const rows = pages.map((page, i) => `<li><a class="row" href="./${page.id}.html"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${escapeHtml(page.title)}</span><span class="d">${escapeHtml(page.summary)}</span></a></li>`).join('\n');
-  write(outDir, 'guide/index.html', shell({
+  const rows = pages.map((entry, i) => `<li><a href="./${entry.id}.html"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${escapeHtml(entry.title)}</span><span class="d">${escapeHtml(entry.summary)}</span></a></li>`).join('\n');
+  write(outDir, 'guide/index.html', page({
     title: 'Guide | living-docs',
     description: 'Guides for the living-docs pipeline, CLI, document model, style tokens, MCP server, and guarantees.',
+    css: 'pages',
     rel: '../',
     active: 'guide',
-    body: `<main id="main"><div class="wrap"><div class="page-head"><div class="eyebrow">Guide</div><h1>Guides, rendered by living-docs</h1><p class="lead">Every page here is a Markdown file in the repository, ingested and rendered by the engine this site documents.</p></div><ul class="list">\n${rows}\n</ul><p class="sec-sub" style="margin-top:var(--space-6)">For module boundaries and decisions, read <a href="${REPO}/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> on GitHub.</p></div></main>`
+    body: `<main id="main"><section class="container page-head stand"><h1>Guides, rendered by living-docs</h1><p class="lead">Every page here is Markdown in the repository, rendered by the engine.</p></section><section class="container list-section"><ul class="guide-list">\n${rows}\n</ul><p class="note page-foot">For module boundaries and decisions, read <a href="${REPO}/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> on GitHub.</p></section></main>`
   }));
   return pages;
-}
-
-function frame(src, label) {
-  return `<div class="shot" aria-hidden="true"><iframe src="${src}" title="${escapeHtml(label)}" loading="lazy" scrolling="no" tabindex="-1"></iframe><a href="${src}" tabindex="-1" aria-label="Open ${escapeHtml(label)}"></a></div>`;
 }
 
 function buildGallery(outDir) {
@@ -220,48 +216,39 @@ function homeBody() {
     .replaceAll('%%NPM%%', NPM);
 }
 
-function homePage() {
-  const title = 'living-docs: docs that explain themselves';
-  const description = 'Turn any source into one self-contained page that highlights as it explains, and export the same timeline as MP4, WebM, or GIF. AXI CLI and MCP server.';
-  return `<!doctype html>
-<html lang="en" data-theme="${DEFAULT_SKIN}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="generator" content="living-docs">
-<meta name="description" content="${escapeHtml(description)}">
-<meta property="og:title" content="${escapeHtml(title)}">
-<meta property="og:description" content="${escapeHtml(description)}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="${SITE_URL}">
-<meta property="og:image" content="${SITE_URL}img/og.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<title>${escapeHtml(title)}</title>
-<style>${read('site/home.css').replace('/*SKINS*/', () => skinCss())}</style>
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="nav"><div class="container"><a class="brand" href="./index.html">living-docs</a><nav aria-label="Site"><a href="./gallery/index.html">Gallery</a><a href="./guide/index.html">Guide</a><a href="${REPO}">GitHub</a></nav></div></header>
-${homeBody()}
-<footer class="site-foot"><div class="container"><span>MIT licensed. Needs Node 20 or newer.</span><span><a href="${REPO}">GitHub</a> <a href="${NPM}">npm</a> <a href="${REPO}/blob/main/ARCHITECTURE.md">Architecture</a></span></div></footer>
-<script>${read('site/home.js')}</script>
-</body>
-</html>
-`;
+const FIT = `function fit(){
+  document.querySelectorAll('.doc-shot').forEach(function(shot){
+    var frame=shot.querySelector('iframe');
+    if(frame){frame.style.transform='scale('+(shot.clientWidth/1440)+')'}
+  });
 }
+fit();
+window.addEventListener('resize',fit);
+if(window.ResizeObserver){document.querySelectorAll('.doc-shot').forEach(function(s){new ResizeObserver(fit).observe(s)})}`;
 
 function galleryIndex(outDir, entries) {
-  const cards = entries.map(entry => `        <article class="card">
-          ${frame(`./${entry.id}.html`, entry.title)}
-          <div class="meta"><div class="tag">${THEME_LABEL[entry.theme]}</div><h3>${escapeHtml(entry.title)}</h3><p>${escapeHtml(entry.blurb)}</p></div>
-          <div class="links"><a href="./${entry.id}.html">Open document</a><a href="./${entry.id}.model.json">Model JSON</a></div>
-        </article>`).join('\n');
-  write(outDir, 'gallery/index.html', shell({
+  const rows = entries.map(entry => {
+    const kb = Math.round(entry.stats.bytes / 1024);
+    return `<section class="doc" data-theme="${entry.theme}" aria-labelledby="doc-${entry.id}">
+  <div class="container doc-grid">
+    <div class="doc-shot" aria-hidden="true"><iframe src="./${entry.id}.html" title="${escapeHtml(entry.title)}" loading="lazy" scrolling="no" tabindex="-1"></iframe><a href="./${entry.id}.html" tabindex="-1" aria-label="Open ${escapeHtml(entry.title)}"></a></div>
+    <div class="doc-meta">
+      <p class="note">${THEME_LABEL[entry.theme]}, ${kb} KB</p>
+      <h2 id="doc-${entry.id}">${escapeHtml(entry.title)}</h2>
+      <p>${escapeHtml(entry.blurb)}</p>
+      <p class="aside"><a href="./${entry.id}.html">Open document<span class="visually-hidden">: ${escapeHtml(entry.title)}</span></a><a href="./${entry.id}.model.json">Model JSON<span class="visually-hidden"> for ${escapeHtml(entry.title)}</span></a></p>
+    </div>
+  </div>
+</section>`;
+  }).join('\n');
+  write(outDir, 'gallery/index.html', page({
     title: 'Gallery | living-docs',
-    description: 'Three documents rendered by living-docs: an academic paper, dark reading notes, and a telemetry console.',
+    description: 'Documents rendered by living-docs: an academic paper, dark reading notes, and a telemetry console.',
+    css: 'pages',
     rel: '../',
     active: 'gallery',
-    body: `<main id="main"><div class="wrap"><div class="page-head"><div class="eyebrow">Gallery</div><h1>Three themes, real pages</h1><p class="lead">Each document is one self-contained HTML file rendered from the JSON model linked beside it. Open one, then print it or resize the window.</p></div><div class="cards">\n${cards}\n</div></div></main>`
+    body: `<main id="main"><div class="container"><header class="page-head"><h1>Pages the engine rendered</h1><p class="lead">Each document is a single HTML file, rendered from its JSON model.</p></header></div>\n${rows}</main>`,
+    script: FIT
   }));
 }
 
@@ -274,14 +261,23 @@ export async function buildSite({ outDir = path.join(root, 'site', 'dist') } = {
   const guide = await buildGuide(outDir);
 
   buildDemo(outDir);
-  write(outDir, 'index.html', homePage());
+  write(outDir, 'index.html', page({
+    title: 'living-docs: docs that explain themselves',
+    description: 'Turn any source into one self-contained page that highlights as it explains, and export the same timeline as MP4, WebM, or GIF. AXI CLI and MCP server.',
+    css: 'home',
+    rel: './',
+    active: '',
+    body: homeBody(),
+    script: read('site/home.js')
+  }));
   fs.cpSync(path.join(root, 'site', 'img'), path.join(outDir, 'img'), { recursive: true });
-  write(outDir, '404.html', shell({
+  write(outDir, '404.html', page({
     title: 'Not found | living-docs',
     description: 'Page not found.',
+    css: 'pages',
     rel: SITE_URL,
     active: '',
-    body: `<main id="main"><div class="wrap"><div class="page-head"><div class="eyebrow">404</div><h1>That page is not here</h1><p class="lead">Try the <a href="${SITE_URL}index.html">home page</a>, the <a href="${SITE_URL}gallery/index.html">gallery</a>, or the <a href="${SITE_URL}guide/index.html">guide</a>.</p></div></div></main>`
+    body: `<main id="main"><section class="container page-head ledge"><h1>That page is not here</h1><p class="lead">Try the <a href="${SITE_URL}index.html">home page</a>, the <a href="${SITE_URL}gallery/index.html">gallery</a>, or the <a href="${SITE_URL}guide/index.html">guide</a>.</p></section></main>`
   }));
 
   return { outDir, gallery: entries.length, guide: guide.length };

@@ -73,7 +73,7 @@ test('home pins one live demo doc and every scroll step points at a real cue', (
 
 test('every skin of the home page keeps readable contrast', () => {
   const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
-  const blocks = [...home.matchAll(/html\[data-theme="([a-z-]+)"\] \{([^}]*)\}/g)];
+  const blocks = [...home.matchAll(/\[data-theme="([a-z-]+)"\] \{([^}]*)\}/g)];
   assert.equal(blocks.length, 3);
   for (const [, name, body] of blocks) {
     const token = key => body.match(new RegExp(`--color-${key}: (#[0-9a-f]{6});`))[1];
@@ -106,6 +106,28 @@ test('published gallery models still validate', () => {
     const model = JSON.parse(fs.readFileSync(path.join(out, `gallery/${name}.model.json`), 'utf8'));
     const validation = validateDoc(model);
     assert.equal(validation.ok, true, JSON.stringify(validation.errors));
+  }
+});
+
+test('every site page shares one nav, and each gallery row wears the theme of its document', () => {
+  const nav = html => [...html.match(/<header class="nav">.*?<\/header>/s)[0].matchAll(/<a [^>]*>([^<]+)<\/a>/g)].map(m => m[1]).join(',');
+  const pagesWithNav = ['index.html', 'gallery/index.html', 'guide/index.html', '404.html'];
+  const navs = pagesWithNav.map(rel => nav(fs.readFileSync(path.join(out, rel), 'utf8')));
+  assert.ok(navs.every(links => links === 'living-docs,Gallery,Guide,GitHub'), navs.join(' | '));
+  const gallery = fs.readFileSync(path.join(out, 'gallery/index.html'), 'utf8');
+  const rows = [...gallery.matchAll(/<section class="doc" data-theme="([a-z-]+)"/g)].map(m => m[1]);
+  assert.deepEqual(rows, ['paper-light', 'paper-dark', 'hud']);
+  assert.match(gallery, /Open document<span class="visually-hidden">: Harness Engineering/);
+  for (const rel of ['gallery/harness-engineering.html', 'guide/cli.html']) {
+    assert.match(fs.readFileSync(path.join(out, rel), 'utf8'), /<header class="ld-bar"><a class="brand" href="\.\.\/index\.html">living-docs<\/a>/);
+  }
+});
+
+test('site copy avoids counted slogans such as "One model, three themes"', () => {
+  for (const rel of ['index.html', 'gallery/index.html', 'guide/index.html', '404.html']) {
+    const text = fs.readFileSync(path.join(out, rel), 'utf8').replace(/<(script|style)[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]+>/g, ' ');
+    assert.doesNotMatch(text, /\b[Oo]ne [a-z-]+, (two|three|four|five|\d) [a-z-]+/, `${rel} has a "one X, N Y" slogan`);
+    assert.doesNotMatch(text, /\b(?:two|three|four|five) [a-z-]+ to (?:a|an) [a-z-]+/i, `${rel} has a "N things to a Y" slogan`);
   }
 });
 

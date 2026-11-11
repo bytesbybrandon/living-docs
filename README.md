@@ -10,7 +10,7 @@ Ships an AXI CLI and a stdio MCP server over the same core.
 
 ### Key Features
 
-* **Three themes:** `paper-light` for papers and reports, `paper-dark` for reading notes and essays, `hud` for repo audits and system snapshots. Curated looks (`field-notes`, `editorial`, `blueprint`) sit on them, and `ingest --draft` designs a look and accent from the source itself.
+* **Themes:** `paper-light` for papers and reports, `paper-dark` for reading notes and essays, `hud` for repo audits and system snapshots. Curated looks (`field-notes`, `editorial`, `blueprint`) sit on them, and `ingest --draft` designs a look and accent from the source itself.
 * **Generated visuals:** diagrams and charts render as inline SVG from a compact spec, and the console hero uses a seeded graph layout.
 * **Living timeline:** cues highlight the source's own sentences, light up the figure parts they describe, count numbers, type text, and scroll the video frame. Motion stays inside each block, so figures and text stay flat and legible. Drafted docs get cues automatically. See [Timeline and video](docs/guide/timeline.md).
 * **Video export:** `render --format mp4|webm|gif` records the timeline frame by frame, with optional Playwright and ffmpeg.

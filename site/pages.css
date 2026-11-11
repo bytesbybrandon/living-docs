@@ -1,0 +1,40 @@
+/* Hallmark · shape: Index · genre: modern-minimal · theme: custom · job: try · idea: "the catalog wears the same system as the home page: each document is shown inside the palette of its own theme" · vibe: "quiet, exact, a shelf of real pages"
+ * paper: oklch(11% 0.004 75) · accent: oklch(66% 0.135 52) · display: system serif (Iowan Old Style stack), system mono in the console skin · body: system sans · hero: a plain head over the first document row · nav: wordmark left, three links right · footer: license line and three links · imagery: the product itself, live in scaled frames · signature: every gallery row takes the palette and type of the theme it shows
+ * axes: dark/roman-serif/warm · posture: Committed, each row takes the palette of its own theme · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the guide index and the 404 are plain on purpose; the gallery rows carry the idea, the reference pages stay out of the way */
+/* Hallmark · dismissed 77 · the guide index and the 404 are reference pages that point at the guide and the gallery, so two sections is the whole content */
+/* Hallmark · dismissed 58 · the window holds eight one-line guide titles with their summaries, a list to scan rather than prose to read */
+.page-head { padding-block: var(--space-3xl) var(--space-xl); }
+.page-head h1 { font-size: var(--text-display-s); line-height: 1; max-width: 16ch; }
+.page-head .lead { margin-top: var(--space-lg); max-width: 36ch; }
+
+.doc { background: var(--color-paper); color: var(--color-ink); border-top: var(--rule-hair) solid var(--color-rule); padding-block: var(--space-2xl); }
+.doc-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-wide); align-items: center; }
+.doc:nth-of-type(even) .doc-shot { order: 2; }
+.doc-shot { position: relative; overflow: hidden; aspect-ratio: 1440 / 900; border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper-2); }
+.doc-shot iframe { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; transform: scale(0.45); pointer-events: none; background: var(--color-paper-2); }
+.doc-shot a { position: absolute; inset: 0; z-index: 2; }
+.doc-meta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-md); }
+.doc-meta h2 { font-size: var(--text-section); line-height: 1.05; }
+.doc-meta p { color: var(--color-ink-2); max-width: 46ch; }
+.doc-meta .note { color: var(--color-muted); }
+.doc-meta a { text-decoration-color: var(--color-accent); }
+
+.page-head.stand { padding-bottom: var(--space-2xl); }
+.page-head.ledge { padding-bottom: var(--section-gap-s); }
+.list-section { padding-block: var(--space-2xl) var(--section-gap-s); }
+.guide-list { list-style: none; margin: 0; padding: 0; border-top: var(--rule-hair) solid var(--color-rule); }
+.guide-list a { display: grid; grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--space-md); align-items: baseline; padding-block: var(--space-lg); border-bottom: var(--rule-hair) solid var(--color-rule); text-decoration: none; }
+.guide-list .n { color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.guide-list .t { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: var(--tracking-display); }
+.guide-list .d { color: var(--color-ink-2); }
+.guide-list a:hover .t { text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 0.16em; }
+.page-foot { padding-top: var(--space-xl); }
+
+@media (max-width: 60rem) {
+  .page-head { padding-block: var(--space-2xl) var(--space-lg); }
+  .doc-grid { grid-template-columns: minmax(0, 1fr); }
+  .doc:nth-of-type(even) .doc-shot { order: 0; }
+  .guide-list a { grid-template-columns: 3rem minmax(0, 1fr); }
+  .guide-list .d { grid-column: 2; }
+}
