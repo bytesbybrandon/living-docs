@@ -1,59 +1,102 @@
 <main id="main">
-  <div class="wrap hero">
-    <div>
-      <div class="eyebrow">AXI CLI &middot; MCP server &middot; Node 20+</div>
-      <h1>Sources become <em>living docs.</em></h1>
-      <p class="lead">Turn a book, a paper, or a repo audit into one self-contained HTML page: an academic paper, dark reading notes, or a telemetry console. Agents author the model; the engine does layout, figures, and print.</p>
-      <div class="cta">
-        <a class="btn primary" href="gallery/index.html">Browse the gallery</a>
-        <a class="btn" href="guide/index.html">Read the guide</a>
-        <a class="btn" href="%%REPO%%">GitHub</a>
-      </div>
+  <div class="story">
+    <header class="intro">
+      <h1>Docs that explain themselves</h1>
+      <p class="lead">Turn any source into a page that highlights as it explains.</p>
       <div class="cmd" role="group" aria-label="Install command">
-        <code><span class="p">$</span>npx -y -p @bytesbybrandon/living-docs living-docs-axi themes</code>
-        <button type="button" data-copy="npx -y -p @bytesbybrandon/living-docs living-docs-axi themes">Copy</button>
+        <code>npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json</code>
+        <button type="button" class="btn primary" data-copy="npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
       </div>
+      <p class="aside"><a href="gallery/index.html">Browse the gallery</a></p>
+    </header>
+
+    <div class="stage" data-stage>
+      <div class="stage-bar">
+        <fieldset class="skins" data-skins>
+          <legend class="visually-hidden">Theme</legend>
+%%SKINS%%
+        </fieldset>
+        <div class="transport" data-transport>
+          <button type="button" class="btn" data-pause aria-pressed="false">Pause</button>
+          <button type="button" class="btn" data-replay>Replay</button>
+        </div>
+      </div>
+      <div class="stage-frame">
+%%FRAMES%%
+      </div>
+      <p class="stage-caption" data-caption aria-hidden="true"><span></span></p>
+      <p class="note stage-foot"><a href="demo/paper-dark.html" data-open>Open this doc</a> <a href="demo/model.json">See its model</a></p>
     </div>
-    <div class="hero-shot">%%HERO_SHOT%%</div>
+
+    <ol class="steps" data-steps>
+      <li class="step" data-at="1.2" data-scroll="story">
+        <p class="say"><span class="wash">It reads your source.</span></p>
+        <p class="note">Markdown, text, HTML, a URL or a PDF becomes an outline with section ids.</p>
+      </li>
+      <li class="step" data-at="4.4" data-scroll="pipeline">
+        <p class="say"><span class="wash">It drafts the model, look and timeline.</span></p>
+        <p class="note">A draft picks a theme and an accent that clears contrast, and marks the sentences to highlight. Edit the JSON if you disagree.</p>
+      </li>
+      <li class="step" data-at="6.6" data-scroll="pipeline">
+        <p class="say"><span class="wash">The engine renders one HTML file.</span></p>
+        <p class="note">Inline CSS and SVG, no network assets. Print, reduced motion and no script all show the final state.</p>
+      </li>
+      <li class="step" data-at="9.3" data-scroll="pipeline">
+        <p class="say"><span class="wash">Cues play in step with the sentences.</span></p>
+        <p class="note">Highlight a sentence and its figure lights up. Numbers count and text types, always inside their own box.</p>
+      </li>
+      <li class="step" data-at="12.2" data-scroll="facts">
+        <p class="say"><span class="wash">One model, three themes.</span></p>
+        <p class="note">Switch the stage and the whole page follows.</p>
+      </li>
+    </ol>
   </div>
 
-  <section aria-labelledby="themes-h">
-    <div class="wrap">
-      <h2 id="themes-h">One model, three styles</h2>
-      <p class="sec-sub">The same validated document model renders as a two-column paper, as dark reading notes, or as a monospaced console. These are the real rendered pages, not screenshots.</p>
-      <div class="cards">
-%%THEME_CARDS%%
+  <section class="band" aria-labelledby="clip-h">
+    <div class="container band-grid flip">
+      <div class="band-copy">
+        <h2 id="clip-h">The same timeline, as a clip</h2>
+        <dl class="formats">
+          <div><dt>MP4</dt><dd>For sharing. 2.5 to 3.7 MB for 20 seconds in our samples.</dd></div>
+          <div><dt>GIF</dt><dd>For READMEs, 720 pixels wide. About 12 MB for 20 seconds.</dd></div>
+          <div><dt>WebM</dt><dd>For the web, from the same frames.</dd></div>
+        </dl>
+        <p class="note">Frames come from headless Chromium and ffmpeg, both optional. Two renders on one machine match frame for frame.</p>
       </div>
+      <figure class="clip">
+        <img src="img/clip.jpg" width="540" height="675" alt="A frame from the exported MP4 of the reading notes sample: the abstract with highlighted sentences above the loop diagram, with one node lit." loading="lazy">
+        <figcaption class="note">Frame at nine seconds of the exported MP4.</figcaption>
+      </figure>
     </div>
   </section>
 
-  <section aria-labelledby="flow-h">
-    <div class="wrap">
-      <h2 id="flow-h">From source to page</h2>
-      <p class="sec-sub">Ingest keeps large sources bounded, a draft model renders immediately, and an author upgrades it against the schema.</p>
-      <ol class="steps">
-        <li><h3>Ingest</h3><p>Markdown, text, HTML, URL, or PDF becomes an outline with section ids and word counts.</p></li>
-        <li><h3>Plan</h3><p>Pick a theme and curated style tokens: palette or seed color, type pairing, density, figure treatment.</p></li>
-        <li><h3>Author</h3><p>Write the model: prose, tables, algorithms, diagrams, charts, callouts. Strict validation points at the exact path.</p></li>
-        <li><h3>Render</h3><p>One HTML file with inline CSS and SVG. Print rules for papers, optional figure motion, no network assets.</p></li>
-      </ol>
-      <div style="height:var(--space-5)"></div>
-<pre class="code"><b>living-docs-axi</b> ingest notes.md --draft --theme paper-dark -o docs/notes.model.json
-<b>living-docs-axi</b> validate docs/notes.model.json
-<b>living-docs-axi</b> render docs/notes.model.json --theme paper-dark -o docs/notes.html
-<b>living-docs-axi</b> preview docs</pre>
+  <section class="band" aria-labelledby="cmd-h">
+    <div class="container">
+      <h2 id="cmd-h">Three commands to a clip</h2>
+      <div class="cmds">
+        <div class="cmd" role="group" aria-label="Draft a model">
+          <code>living-docs-axi ingest notes.md --draft -o notes.json</code>
+          <button type="button" class="btn" data-copy="living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
+        </div>
+        <div class="cmd" role="group" aria-label="Render the page">
+          <code>living-docs-axi render notes.json -o notes.html</code>
+          <button type="button" class="btn" data-copy="living-docs-axi render notes.json -o notes.html">Copy</button>
+        </div>
+        <div class="cmd" role="group" aria-label="Render the clip">
+          <code>living-docs-axi render notes.json --format mp4 -o notes.mp4</code>
+          <button type="button" class="btn" data-copy="living-docs-axi render notes.json --format mp4 -o notes.mp4">Copy</button>
+        </div>
+      </div>
+      <p class="note">Run them through <code>npx -y -p @bytesbybrandon/living-docs</code>. Video also needs <code>playwright</code> and <code>ffmpeg</code>; the <a href="guide/timeline.html">timeline guide</a> has the exact call.</p>
     </div>
   </section>
 
-  <section aria-labelledby="agents-h">
-    <div class="wrap">
-      <h2 id="agents-h">Built for agents</h2>
-      <p class="sec-sub">The CLI follows the AXI principles: compact output, a content-first home view, and next-step hints. The same core is an MCP server over stdio.</p>
-      <div class="grid2">
-        <div class="panel">
-          <h3>MCP server</h3>
-          <p>Add it to any MCP client.</p>
-<pre class="code">{
+  <section class="band" aria-labelledby="agents-h">
+    <div class="container band-grid">
+      <div>
+        <h2 id="agents-h">Built for agents</h2>
+        <p>The same core runs as an MCP server over stdio. <a href="guide/mcp.html">Client setup</a>.</p>
+        <pre class="code" tabindex="0" aria-label="MCP client configuration">{
   "mcpServers": {
     "living-docs": {
       "command": "npx",
@@ -61,35 +104,37 @@
     }
   }
 }</pre>
-        </div>
-        <div class="panel">
-          <h3>Five tools</h3>
-          <table>
-            <thead><tr><th>Tool</th><th>Does</th></tr></thead>
-            <tbody>
-              <tr><td>living_docs_themes</td><td>List themes and when to use each</td></tr>
-              <tr><td>living_docs_schema</td><td>Block fields, or one block in detail</td></tr>
-              <tr><td>living_docs_ingest</td><td>Outline a source, optionally draft a model</td></tr>
-              <tr><td>living_docs_render</td><td>Validate and write HTML</td></tr>
-              <tr><td>living_docs_preview</td><td>Serve built docs, return the URL</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
+      <dl class="tools">
+        <div><dt>living_docs_themes</dt><dd>List themes and what each suits</dd></div>
+        <div><dt>living_docs_schema</dt><dd>Block fields, or one block</dd></div>
+        <div><dt>living_docs_ingest</dt><dd>Outline a source, draft a model</dd></div>
+        <div><dt>living_docs_render</dt><dd>Validate, then write HTML or video</dd></div>
+        <div><dt>living_docs_preview</dt><dd>Serve built docs</dd></div>
+      </dl>
     </div>
   </section>
 
-  <section aria-labelledby="facts-h">
-    <div class="wrap">
+  <section class="band" aria-labelledby="facts-h">
+    <div class="container">
       <h2 id="facts-h">What you can rely on</h2>
-      <p class="sec-sub">These are properties of the engine, each covered by tests.</p>
-      <div class="facts">
-        <div class="fact"><h3>One file per document</h3><p>CSS, SVG, and the console runtime are inlined. No CDN, web fonts, or remote images.</p></div>
-        <div class="fact"><h3>Deterministic output</h3><p>The same model and theme produce the same bytes, including SVG ids, graph layout, and derived palettes.</p></div>
-        <div class="fact"><h3>Escaped by default</h3><p>Document text is HTML escaped. Only http, https, mailto, hash, and relative links survive.</p></div>
-        <div class="fact"><h3>Curated styling</h3><p>Style tokens are an allowlist. Seed colors are corrected until the accent clears contrast. No arbitrary CSS.</p></div>
-        <div class="fact"><h3>Motion that respects you</h3><p>Figure motion freezes for print and under reduced-motion preferences, and content stays visible while it runs.</p></div>
-        <div class="fact"><h3>Print ready</h3><p>Paper themes keep figures, tables, algorithms, and callouts unbroken across pages.</p></div>
+      <ul class="facts">
+        <li><h3>One file per document</h3><p>No CDN, web fonts or remote images.</p></li>
+        <li><h3>Deterministic output</h3><p>Same model and theme, same bytes.</p></li>
+        <li><h3>Escaped by default</h3><p>Only http, https, mailto, hash and relative links survive.</p></li>
+        <li><h3>Print ready</h3><p>Figures, tables and callouts stay unbroken.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="close" aria-labelledby="close-h">
+    <div class="container close-grid">
+      <h2 id="close-h"><span class="wash">Give it your notes</span></h2>
+      <div>
+      <div class="cmd" role="group" aria-label="Install command">
+        <code>npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json</code>
+        <button type="button" class="btn primary" data-copy="npx -y -p @bytesbybrandon/living-docs living-docs-axi ingest notes.md --draft -o notes.json">Copy</button>
+      </div>
       </div>
     </div>
   </section>

@@ -61,6 +61,14 @@ npx -y -p @bytesbybrandon/living-docs -p playwright living-docs-axi render notes
 npx playwright install chromium
 ```
 
+## Driving a live doc from another page
+
+A same-origin page that embeds a timed doc in an iframe can take over its clock through `window.__ld`.
+`pause()` hands the clock to the host, and `seek(t)` then renders the frame at `t` seconds.
+`play()` resumes from the last shown time, `replay()` restarts from zero, and `time()` reads the current time.
+The home page of this site pins one doc and scrubs it as the reader scrolls.
+The controls exist only on a live page; under reduced motion, in print, and in video capture the doc shows its final state or seeks per frame, so a host should check that `pause` is a function first.
+
 ## Accessibility and print
 
 Under `prefers-reduced-motion`, print, or with scripts off, the page shows its final state: everything revealed, counted, and typed, with narrated sentences underlined.

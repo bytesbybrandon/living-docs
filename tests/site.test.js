@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { buildSite } from '../scripts/build-site.js';
 import { validateDoc } from '../src/model/validate.js';
+import { contrastRatio } from '../src/render/style.js';
 
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'living-docs-site-'));
 const built = await buildSite({ outDir: out });
@@ -19,7 +20,7 @@ function pages(dir = out) {
 test('builds home, gallery, guide, and a 404 page', () => {
   assert.equal(built.gallery, 3);
   assert.equal(built.guide, 8);
-  for (const rel of ['index.html', '404.html', 'gallery/index.html', 'guide/index.html', 'guide/cli.html', 'guide/timeline.html', 'gallery/harness-engineering.html', 'gallery/agent-skills-audit.model.json']) {
+  for (const rel of ['index.html', '404.html', 'gallery/index.html', 'guide/index.html', 'guide/cli.html', 'guide/timeline.html', 'gallery/harness-engineering.html', 'gallery/agent-skills-audit.model.json', 'demo/paper-light.html', 'demo/paper-dark.html', 'demo/hud.html', 'img/og.jpg', 'img/clip.jpg']) {
     assert.ok(fs.existsSync(path.join(out, rel)), `${rel} exists`);
   }
 });
@@ -46,6 +47,41 @@ test('pages load no remote styles, scripts, or fonts', () => {
     assert.doesNotMatch(html, /<script[^>]+src=/i, path.relative(out, file));
     assert.doesNotMatch(html, /@import|url\(\s*['"]?https?:/i, path.relative(out, file));
     assert.doesNotMatch(html, /%%[A-Z_]+%%/, `${path.relative(out, file)} has an unfilled template token`);
+  }
+});
+
+test('home pins one live demo doc and every scroll step points at a real cue', () => {
+  const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+  const demo = JSON.parse(fs.readFileSync(new URL('../site/demo.model.json', import.meta.url), 'utf8'));
+  const frames = [...home.matchAll(/<iframe data-skin="([a-z-]+)"([^>]*)>/g)];
+  assert.deepEqual(frames.map(m => m[1]), ['paper-light', 'paper-dark', 'hud']);
+  assert.equal(frames.filter(m => /\ssrc=/.test(m[2])).length, 1, 'only the default theme loads at first paint');
+  assert.ok(frames.every(m => /title="Live demo document/.test(m[2])));
+  assert.match(home, /<meta property="og:image" content="https:\/\/[^"]+\/img\/og\.jpg">/);
+  const steps = [...home.matchAll(/<li class="step" data-at="([\d.]+)" data-scroll="([a-z-]+)">/g)];
+  assert.equal(steps.length, 5);
+  const ids = new Set(demo.blocks.map(block => block.id));
+  for (const [, at, id] of steps) {
+    assert.ok(Number(at) <= demo.timeline.duration, `step at ${at} is inside the timeline`);
+    assert.ok(ids.has(id), `step scrolls to a block that exists: ${id}`);
+  }
+  for (const theme of ['paper-light', 'paper-dark', 'hud']) {
+    const doc = fs.readFileSync(path.join(out, `demo/${theme}.html`), 'utf8');
+    for (const id of ids) assert.match(doc, new RegExp(`data-cue="${id}"`), `${theme} carries block ${id}`);
+  }
+});
+
+test('every skin of the home page keeps readable contrast', () => {
+  const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+  const blocks = [...home.matchAll(/html\[data-theme="([a-z-]+)"\] \{([^}]*)\}/g)];
+  assert.equal(blocks.length, 3);
+  for (const [, name, body] of blocks) {
+    const token = key => body.match(new RegExp(`--color-${key}: (#[0-9a-f]{6});`))[1];
+    const paper = token('paper');
+    assert.ok(contrastRatio(token('ink'), paper) >= 7, `${name} ink`);
+    for (const key of ['ink-2', 'muted', 'accent']) assert.ok(contrastRatio(token(key), paper) >= 4.5, `${name} ${key}`);
+    assert.ok(contrastRatio(token('accent-ink'), token('accent')) >= 4.5, `${name} text on accent`);
+    assert.ok(contrastRatio(token('muted'), token('paper-2')) >= 4.5, `${name} muted on surface`);
   }
 });
 

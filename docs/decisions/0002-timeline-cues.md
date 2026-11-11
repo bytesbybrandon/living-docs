@@ -33,6 +33,7 @@ Alternatives rejected:
 
 Docs without a timeline keep their bytes and ship no runtime.
 Print, reduced motion, and no script show the final state.
+A host page can pause, scrub, play, and replay a live doc through `window.__ld`, so embeds can offer a pause control.
 Playwright and ffmpeg stay optional; video features report typed errors when either is missing.
 Frames match across runs on one machine; encoded bytes may differ across machines and ffmpeg builds.
 Revisit if cue authoring needs scroll-driven playback, sound, or per-theme stage compositions.
