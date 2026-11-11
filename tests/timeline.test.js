@@ -10,7 +10,7 @@ import { validateDoc } from '../src/model/validate.js';
 import { renderInline, plainText } from '../src/model/markdown.js';
 import { draftCues } from '../src/ingest/cues.js';
 import { timelineDuration } from '../src/render/timeline.js';
-import { captureFrames, exportVideo } from '../src/export/video.js';
+import { captureFrames, exportVideo, ffmpegTarget } from '../src/export/video.js';
 
 const base = () => ({
   schemaVersion: 1,
@@ -242,4 +242,12 @@ test('exports a gif through ffmpeg', { skip: (!chromiumReady || !ffmpegReady) &&
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('ffmpeg only ever receives a local file path', () => {
+  assert.equal(ffmpegTarget('docs/a.mp4'), `file:${path.resolve('docs/a.mp4')}`);
+  assert.equal(ffmpegTarget('-y'), `file:${path.resolve('-y')}`);
+  assert.equal(ffmpegTarget('rtmp://host/live'), `file:${path.resolve('rtmp://host/live')}`);
+  assert.throws(() => ffmpegTarget(''), { code: 'bad-output' });
+  assert.throws(() => ffmpegTarget(undefined), { code: 'bad-output' });
 });

@@ -3,6 +3,7 @@
 
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import path from 'node:path';
 import { renderDoc, RenderError } from '../render/index.js';
 import { timelineDuration } from '../render/timeline.js';
 
@@ -98,6 +99,12 @@ function encoderArgs(format, { fps, gifWidth, gifFps }) {
   return ['-vf', `fps=${Math.min(gifFps, fps)},scale=${gifWidth}:-2:flags=lanczos,split[a][b];[a]palettegen=stats_mode=full[p];[b][p]paletteuse=dither=sierra2_4a`, '-loop', '0'];
 }
 
+/** Always hand ffmpeg a local file: never an option, a URL, or a pipe, whatever the caller passed as `out`. */
+export function ffmpegTarget(out) {
+  if (typeof out !== 'string' || !out.trim()) throw new ExportError('out must be a file path', { code: 'bad-output' });
+  return `file:${path.resolve(out)}`;
+}
+
 /**
  * Render a model to mp4, webm, or gif.
  * @returns {Promise<{file: string, format: string, frames: number, duration: number, width: number, height: number, framesSha256: string, theme: string}>}
@@ -114,7 +121,7 @@ export async function exportVideo(model, { theme, baseDir, format = 'mp4', size,
     '-f', 'image2pipe', '-framerate', String(fps), '-i', '-',
     ...encoderArgs(format, { fps, gifWidth, gifFps }),
     '-fflags', '+bitexact', '-map_metadata', '-1',
-    out
+    '-f', format, ffmpegTarget(out)
   ], { stdio: ['pipe', 'ignore', 'pipe'] });
   let stderr = '';
   ffmpeg.stderr.on('data', chunk => { stderr += chunk; });
