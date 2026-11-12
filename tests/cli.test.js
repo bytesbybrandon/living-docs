@@ -25,6 +25,15 @@ test('home view is content first', () => {
   assert.match(out, /Run `living-docs-axi ingest/);
 });
 
+test('version prints only the package version', () => {
+  const expected = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+  for (const args of [['--version'], ['-v'], ['version']]) {
+    const { code, out } = run(args);
+    assert.equal(code, 0);
+    assert.equal(out, expected);
+  }
+});
+
 test('themes and schema are compact and complete', () => {
   const themes = run(['themes']);
   assert.equal(themes.code, 0);
