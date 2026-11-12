@@ -5,6 +5,7 @@ The `living-docs-axi` command follows the AXI principles: compact TOON-style out
 ```text
 living-docs-axi                         home: themes, built docs, next steps
 living-docs-axi themes                  theme list with when to use each
+living-docs-axi version                print the version only, also --version or -v
 living-docs-axi schema [--block figure] block fields and types
 living-docs-axi ingest <path|url|->     outline, or --section <n|id> for one section
 living-docs-axi ingest <path> --draft   write a model, with a drafted timeline, from the source

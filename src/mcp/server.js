@@ -9,6 +9,7 @@ import { validateDoc, formatErrors } from '../model/validate.js';
 import { BLOCKS, THEMES, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
 import { exportVideo, FORMATS } from '../export/video.js';
+import { VERSION } from '../version.js';
 
 const quoteCell = value => {
   const text = String(value ?? '');
@@ -256,7 +257,7 @@ async function handle(name, args = {}) {
 
 export function createServer() {
   const server = new Server(
-    { name: 'living-docs', version: '0.1.0' },
+    { name: 'living-docs', version: VERSION },
     {
       capabilities: { tools: {} },
       instructions: 'Turn source documents into designed living docs. Ingest to get an outline, author a document model against the schema, then render with a theme from living_docs_themes. A draft without a theme picks a look from the source.'

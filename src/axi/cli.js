@@ -9,6 +9,7 @@ import { validateDoc, formatErrors } from '../model/validate.js';
 import { BLOCKS, THEMES, META, STYLE, blockFieldSummary } from '../model/schema.js';
 import { createPreviewServer } from '../server/preview.js';
 import { exportVideo, FORMATS } from '../export/video.js';
+import { VERSION } from '../version.js';
 
 const HOME = os.homedir();
 const BIN = fileURLToPath(new URL('../../bin/living-docs-axi.js', import.meta.url));
@@ -36,13 +37,14 @@ const FLAGS = {
   '--size': 'value',
   '--fps': 'value',
   '--scale': 'value',
-  '--help': 'bool', '-h': 'bool'
+  '--help': 'bool', '-h': 'bool',
+  '--version': 'bool', '-v': 'bool'
 };
 
 function parseArgs(argv) {
   const positionals = [];
   const flags = {};
-  const canonical = { '-o': 'out', '-h': 'help' };
+  const canonical = { '-o': 'out', '-h': 'help', '-v': 'version' };
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
     if (!token.startsWith('-') || token === '-') { positionals.push(token); continue; }
@@ -394,6 +396,7 @@ const COMMAND_HELP = {
   validate: 'validate <model.json|->',
   preview: 'preview [file|dir] [--port <n>] [--no-open]',
   themes: 'themes',
+  version: 'version',
   schema: 'schema [--block <type>]'
 };
 
@@ -417,6 +420,7 @@ export async function main(argv) {
     return [`error: ${error.message}`, usage()].join('\n');
   }
   const { command, args, flags } = parsed;
+  if (flags.version || command === 'version') return VERSION;
   if (flags.help || flags.h || command === 'help') return usage(command === 'help' ? args[0] : command);
 
   try {
