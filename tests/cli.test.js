@@ -36,6 +36,8 @@ test('themes and schema are compact and complete', () => {
   assert.match(schema.out, /^block: figure$/m);
   assert.match(schema.out, /fields\[\d+\]\{name,kind,required,desc\}:/);
   assert.match(schema.out, /diagram/);
+  assert.match(schema.out, /^ {2}diagram\.nodes\[\]\.x,number,yes,/m);
+  assert.match(schema.out, /^ {2}chart\.series\[\]\.tone,enum\(accent\|ink\|muted\|kept\|rejected\),no,/m);
 });
 
 test('ingest prints an outline and one section', () => {

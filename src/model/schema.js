@@ -382,19 +382,31 @@ export const THEMES = {
   }
 };
 
+function describeField(name, spec) {
+  return {
+    name,
+    kind: spec.kind,
+    required: !spec.optional,
+    desc: spec.desc,
+    ...(spec.values ? { values: spec.values } : {}),
+    ...(spec.of ? { of: spec.of.kind } : {})
+  };
+}
+
+// Nested object fields are listed under dotted paths and array items under `[]`,
+// so `diagram.nodes[].x` is discoverable without reading the source.
+function flattenFields(fields, prefix = '') {
+  return Object.entries(fields).flatMap(([name, spec]) => {
+    const path = `${prefix}${name}`;
+    const row = describeField(path, spec);
+    const inner = spec.kind === 'object' ? spec : spec.kind === 'array' && spec.of?.kind === 'object' ? spec.of : null;
+    if (!inner) return [row];
+    return [row, ...flattenFields(inner.fields, `${path}${spec.kind === 'array' ? '[].' : '.'}`)];
+  });
+}
+
 export function blockFieldSummary(type) {
   const block = BLOCKS[type];
   if (!block) return null;
-  return {
-    type,
-    summary: block.summary,
-    fields: Object.entries(block.fields).map(([name, spec]) => ({
-      name,
-      kind: spec.kind,
-      required: !spec.optional,
-      desc: spec.desc,
-      ...(spec.values ? { values: spec.values } : {}),
-      ...(spec.of ? { of: spec.of.kind } : {})
-    }))
-  };
+  return { type, summary: block.summary, fields: flattenFields(block.fields) };
 }
